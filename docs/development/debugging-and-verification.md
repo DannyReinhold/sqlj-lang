@@ -406,3 +406,89 @@ Use [the installed-plugin procedure](../../examples/debugging/README.md) to reco
 F8/F7/Shift+F8 results, selected-frame variable display and unexpected generated
 stops. Watches/evaluation still require the next dedicated implementation and
 acceptance slice; reading JDI locals is not equivalent to expression evaluation.
+
+
+### Java expression preparation at the suspended SQLJ position
+
+The old code-fragment factory only overrode the deprecated `createCodeFragment`
+entry point and selected a whole class as its Java context. The current SDK uses
+`createPsiCodeFragment` and its presentation counterpart through final wrappers;
+the implementation now overrides the supported `*Impl` hooks. Deprecated public
+bridges delegate to those wrappers, rather than calling the deprecated base method
+that can throw AbstractMethodError. The native evaluator and runtime wrappers are
+retained.
+
+The effective Java context is the projected leaf at the original SQLJ offset.
+For a native SQLJ statement, the shared scope resolver uses its retained semicolon
+as the Java lexical anchor. Native Java sibling leaves are accepted and preserved;
+ordinary Java and null contexts remain untouched. No generated-source lookup or
+whole-class fallback is used. Legacy projected views retain their method context.
+
+`SqljCodeFragmentScopeTest` covers parameters/locals, field shadowing and explicit
+this, expired/future locals, catch variables, selected-method scope, nested-class
+this, static context, native/legacy views, source/debugger imports, presentation
+and code-block fragments, legacy entry points and unrelated Java. These are SDK
+PSI tests. They require the pinned IntelliJ SDK to run and do not prove live
+expression execution. Follow [the Watches/Evaluate procedure](../../examples/debugging/README.md)
+for installed-plugin acceptance and record parse/resolve/runtime failures separately.
+
+
+### Conditions/log expressions and explicit Java factory dispatch
+
+IntelliJ's `DebuggerUtilsEx.getCodeFragmentFactory` filters extensions by the
+expression's stored file type and then by accepted context. The SQLJ-only
+registration cannot be selected for an expression explicitly labelled Java.
+`SqljJavaCodeFragmentFactory` therefore exposes the same lexical preparation with
+JavaFileType while retaining the strict SQLJ-context predicate. The original
+SQLJ registration remains for inferred and existing SQLJ-labelled expressions.
+Neither registration accepts ordinary Java context. The Java registration is
+ordered first so the source-specific handler is selected before a generic fallback.
+
+No independent condition/log evaluator is added. The native line breakpoint
+already selects a code-fragment factory for condition and log expressions and
+executes the native Java evaluator. `SqljBreakpointExpressionTest` covers the
+actual factory-dispatch wrapper, explicit/inferred/legacy labels, SQLJ-opening-line
+scope, Java sibling roots, ordinary Java isolation, boolean and String expression
+PSI, local/field shadowing and unknown names. A real SDK SQLJ breakpoint carries
+a Java-labelled condition/log expression through the existing Java bridge, uses
+SuspendPolicy.NONE and retains its independent log when the condition is cleared.
+
+These are SDK selection/PSI/settings checks, not runtime evaluator tests.
+[The manual procedure](../../examples/debugging/README.md) specifies false/true
+hits, log-only execution, combined condition/log filtering and visible error
+feedback. The existing JDI regressions do not substitute for that acceptance.
+
+
+### Shared-file test contexts and inferred expression language
+
+A source leaf obtained through findElementAt in a shared SQLJ view can belong to
+PsiJavaFile rather than SqljFile. Tests must obtain the SQLJ root through
+`leaf.getContainingFile().getViewProvider().getPsi(SqljLanguage.INSTANCE)` before
+casting it, and use the desired root's AST when testing language-specific leaves.
+The production factory already accepts both roots through the view provider.
+
+When an expression has no stored language, IntelliJ infers its file type from
+the actual context's containing PSI file. Thus a Java-root context selects the
+SQLJ-aware Java alias, while a SQLJ-root context selects the original factory.
+An explicitly stored SQLJ expression remains supported with either root.
+Regression assertions now check both exact factory choices and parameter/local
+resolution through the real dispatch wrapper, rather than assuming every leaf in
+a `.sqlj` document belongs to its SQLJ root. No runtime factory behavior is changed
+by this test correction.
+
+## Paused-session metadata diagnostics
+
+`SQLJ: Inspect Debug Session` separates editor PSI collection under a read action
+from JDI access in a `SuspendContextCommandImpl` on the debugger manager thread.
+A resumed/stopped session cancels the command and asks the user to retry. No JDI
+is accessed by the action's presentation update. The action remains discoverable
+without an editor and explains missing paused-session prerequisites.
+
+`SqljDebugRuntimeSnapshot` captures immutable metadata without reading variable
+values or invoking application code. Pure tests cover report fingerprints,
+missing metadata, unrelated/nested classes, bounded content and source/vendor
+payload exclusion. Real-VM breakpoint tests also capture the selected frame,
+visible variable types, executable SQLJ locations and matching provenance.
+SDK fixture tests cover action registration and SQLJ/Java sibling-root context
+selection. These require the pinned IntelliJ SDK and are separate from the
+standalone JDI checks. Manual DB2 and Liberty acceptance remains necessary.

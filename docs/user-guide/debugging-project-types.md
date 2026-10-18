@@ -214,6 +214,49 @@ The SQLJ extra stepping filter only steps out of recognized SQLJ/DB2 runtime
 packages. It does not globally force Step Into, hide user lambdas/synthetic methods,
 or filter Spring/Liberty frames. IntelliJ's own stepping preferences still apply.
 
+## Watches, Evaluate Expression and lexical scope
+
+The SQLJ code-fragment factory prepares **Java** expressions at the suspended
+source position, using the same Java projection as host-expression code insight.
+It keeps the enclosing method/block rather than using a class-level context.
+Current SDK hooks cover both evaluation and presentation fragments; compatibility
+bridges also handle the deprecated entry points.
+
+For the [manual helper scenario](../../examples/debugging/README.md), stop after
+`offset` is initialized, select the helper frame and evaluate `count`, `offset`
+and `count + offset` in Watches and **Evaluate Expression** (`Alt+F8`). Select the
+caller frame to inspect its locals and `this.dataSource`. Enter Java expressions,
+not `:count` or `#sql` text. A static frame has no `this`; not-yet-initialized or
+out-of-scope locals can legitimately be unavailable.
+
+This patch adds lexical-context preparation and SDK regression coverage. Live
+Watches/evaluation, conditions and log expressions still need installed-plugin
+acceptance. The native Java debugger remains responsible for expression execution,
+actual runtime values and method invocation; the plugin does not introduce a
+separate SQL evaluator. The same context preparation has no Spring Boot dependency.
+
+## Conditional breakpoints and log expressions
+
+SQLJ line breakpoints retain the native Java debugger's conditions, log actions
+and suspend policies. Open a breakpoint's properties by right-clicking its gutter
+symbol or through **Run > View Breakpoints** (`Ctrl+Shift+F8`). A **Condition** is a
+Java boolean expression in the stopped method/block's scope. **Evaluate and log**
+is a Java expression whose value is printed to the debugger Console. Uncheck
+**Suspend** for a log-only breakpoint; a condition can also restrict which hits log.
+
+Use [the deterministic condition/log scenario](../../examples/debugging/README.md):
+three helper invocations with values 0, 1, 2, a shadowed local/field and an expected
+single conditional hit. It also checks non-suspending logs, combined condition/log
+behavior and expression errors. Set the breakpoint after the referenced locals'
+initializers. Every matching request can execute the expressions again.
+
+Explicitly **Java**-labelled expressions use the SQLJ-aware Java factory whenever
+the source context belongs to a SQLJ file. Expressions inferred from SQLJ source
+or previously stored with the SQLJ language keep the original factory. Ordinary
+Java files are not intercepted. Evaluation remains the native Java debugger's
+responsibility; the plugin supplies the lexical context, not a separate language
+or server runtime. Live condition/log behavior is a separate acceptance gate.
+
 ## Diagnosing missing SQLJ breakpoints
 
 First verify a normal Java breakpoint in the **same running server/application**.
@@ -241,6 +284,46 @@ than matching every occurrence of `sqlj` in the constant pool.
 For an issue report record IDE/plugin/JDK versions, Liberty version, translator
 version/options, launch type, Maven goals, source roots and the affected SMAP.
 Report stepping/evaluation behavior separately from successful breakpoint hits.
+
+## Inspect a paused debug session
+
+Use **Tools → SQLJ: Inspect Debug Session** (also available through Find Action)
+while a Java debug session is paused. Keep the `.sqlj` editor open and place the
+caret on the breakpoint line you want to inspect. If SQLJ breakpoints do not bind,
+pause at an ordinary Java breakpoint first. Select the relevant stack frame.
+The read-only report can be copied with Ctrl+A, Ctrl+C.
+
+The report distinguishes the selected runtime frame from the class expected for
+the editor file. It includes the VM, class-loader identity, Java/SQLJ coordinates,
+loaded SMAP line rules, locations for the editor line, source fingerprint and
+Java expression-factory/context metadata. Matching top-level classes are checked
+even when the selected frame belongs to a controller or another Java class.
+Multiple class loaders are listed separately (at most five candidates).
+
+| Report | Interpretation |
+| --- | --- |
+| `MATCH` | The embedded source fingerprint matches the editor text, normalizing line endings. This is not proof that the entire deployed artifact is current. |
+| `MISMATCH` | Editor source and embedded fingerprint differ. Rebuild, redeploy if applicable, and start a new debug session. Unsaved changes also count. |
+| `ABSENT` | No plugin fingerprint is available. Source freshness is unverified, even if SMAP exists. |
+| Zero locations for the caret line | Check whether the line is executable, then the mapping and loaded source revision. |
+| No loaded top-level class | The class may not have been used yet; an executing nested class is reported independently through the selected frame. |
+| Missing local-variable metadata | Check compiler debug information and the selected frame; no variable values are required for this report. |
+
+The action commits editor PSI without saving the file. It does not evaluate
+expressions, invoke application methods, rebuild, deploy or upload the report.
+It collects variable names and types, **not values**, and does not include source
+text or raw SMAP vendor payloads. Paths, class and variable names can still reveal
+project information; review the report before sharing it. Output is limited to
+50 visible variables, 60 numeric SMAP rules and 10 locations per class.
+For Liberty, verify the deployed WAR/JAR separately: a class-loader identifier
+and SMAP digest do not identify an artifact's filesystem path or bytecode hash.
+
+Manual checks: capture a report at a SQLJ breakpoint, then at a Java breakpoint
+with the SQLJ editor open. Edit the SQLJ source without saving and verify that
+its fingerprint becomes `MISMATCH`; undo the edit and check again. Also run the
+action while the VM is running: it should explain that a paused frame is needed.
+Successful report capture does not establish stepping, watch or condition support;
+continue those acceptance scenarios independently.
 
 ## Reference documentation
 

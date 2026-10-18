@@ -634,3 +634,46 @@ A controlled real-JVM fixture covers mapped Step Over/Into/Out and locals/caller
 frames. [Manual acceptance](../../examples/debugging/README.md) remains required
 for IntelliJ commands against the actual DB2 application. This does not complete
 Watches/Evaluate Expression or the separate Liberty deployment/attach acceptance.
+
+
+### Watches and Evaluate Expression: lexical preparation
+
+The next slice preserves the suspended SQLJ method/block context when preparing
+native Java debugger expressions. It adds current SDK evaluation/presentation
+hooks and compatibility bridges, and removes class-level context replacement.
+Thirteen SDK scenarios cover lexical scope, shadowing, this, imports, nested/static
+contexts and fragment entry points. Manual Watches/Evaluate acceptance is now
+specified in [the debugger scenario](../../examples/debugging/README.md).
+
+Remaining gate: record actual Watches, Alt+F8 evaluation and frame switching in
+the installed DB2 wizard application, followed by conditions/log expressions.
+PSI resolution and JDI local reads are distinct evidence. Liberty deployment/attach,
+full customer toolchain compatibility and Oracle remain separate later work.
+
+
+### Native conditional/log breakpoint preparation
+
+A Java-file-type alias of the SQLJ fragment factory closes the explicit-language
+dispatch gap for Watches, conditions and log expressions. Context acceptance stays
+restricted to SQLJ source providers, including native Java sibling roots. Existing
+SQLJ-labelled expressions keep the original registration. Native Java condition
+execution, log actions and suspend policies remain unchanged.
+
+Ten SDK scenarios exercise dispatch, lexical preparation and native SQLJ breakpoint
+settings. [Manual acceptance](../../examples/debugging/README.md) now includes a
+three-invocation conditional hit and non-suspending logs with local/field shadowing.
+Actual IDE execution, expression errors and combined condition/log behavior remain
+the current gate. Dedicated Liberty deployment/attach acceptance follows; no
+Spring Boot requirement or Oracle integration has been introduced.
+
+### Debugger diagnostics checkpoint
+
+The paused-session inspection action now reports loaded SMAP/provenance,
+class-loader identity, editor-line locations and expression context for both
+local Java sessions and remote Java sessions such as Liberty. It does not
+perform deployment or infer artifact identity from a matching source hash.
+Next acceptance gate: exercise the container-generated DB2 project with
+breakpoints, stepping, locals, watches, conditional and log breakpoints together.
+Then validate deployment/attach and source matching in a real Spring/Liberty
+project. Oracle SQLJ remains deferred until the DB2 integration/debugging
+baseline is accepted.
