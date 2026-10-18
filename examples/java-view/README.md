@@ -127,3 +127,21 @@ The [scope probe](scopes/README.md) checks block boundaries, shadowing, declarat
 order and static context, plus ordinary names beginning with in/out. Host references
 and the custom completion contributor now use Java's lexical scope traversal.
 Inherited fields retain their original Java navigation targets.
+
+## Context header types
+
+The [header probes](headers/README.md) now cover runtime roles: a single
+ConnectionContext or ExecutionContext, ordered connection/execution pairs,
+untranslated SQLJ contexts, Java factories, array elements and invalid static
+types. Put the SQLJ runtime on the module classpath and keep the shared-view marker.
+
+The same header guide now includes ContextApiProbe.sqlj and a separate ordinary
+Java consumer. They check runtime-interface assignability, inherited methods and
+constants, checked exceptions, chained ExecutionContext completion and navigation
+to the actual runtime library before any SQLJ translation.
+
+## Iterator runtime interfaces
+
+The [iterator API probes](iterators/README.md) cover named/positional Java interface
+assignability, generated getters, inherited runtime methods/constants, JDBC chaining,
+source navigation and invalid mixed/duplicate/void column declarations.

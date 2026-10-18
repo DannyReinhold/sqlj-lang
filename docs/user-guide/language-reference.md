@@ -133,6 +133,18 @@ SQLJ allows executing statements across specific database connections using conn
 #sql public context ProductionContext with (dataSource = "jdbc/prod");
 ```
 
+For the modeled DB2 API, a context without dataSource has constructors accepting
+an existing JDBC Connection, a SQLJ ConnectionContext, URL plus autocommit, URL plus
+user/password/autocommit, or URL plus Properties/autocommit. A context declared
+with a dataSource string literal instead offers the two wrapper constructors,
+a parameterless constructor and a user/password constructor. Each declares
+SQLException. The dataSource name refers to a separately registered JNDI resource;
+the declaration does not create it.
+
+The IDE checks duplicate option names and the literal dataSource form. Other
+Java-ID attributes are user-defined; they are not automatically applied as JDBC
+connection properties. See the [manual constructor matrix](../../examples/java-view/headers/README.md).
+
 ### 4.2 Context Qualifiers
 
 Prefix `#sql` with a context qualifier `[contextVariable]` to route execution to that specific context instance:

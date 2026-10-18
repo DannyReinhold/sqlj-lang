@@ -1,6 +1,6 @@
 <!-- SPDX-License-Identifier: CC-BY-4.0; code examples: MIT -->
 
-# Integration roadmap — 2026-10-17
+# Integration roadmap — 2026-10-18
 
 Baseline: `5f7eff2`. This roadmap supersedes completion claims in the historical
 [development plan](development-plan.md). Registered extensions and passing helper
@@ -21,38 +21,62 @@ tests do not establish working editor or debugger features.
   Desired discovery order: explicit tool, installed tool on PATH, container extraction.
   Current template instead detects a fixed local Maven artifact before container
   extraction. PATH discovery is a future implementation item, not an existing feature.
-- Customer builds own translation/binding. Debugging must attach to their artifacts;
-  never silently rebuild them using the development container's translator.
+- First acceptance target: a fresh wizard-generated project using the DB2 container
+  toolchain must build, run and debug out of the box. No customer artifacts or
+  cross-translator comparison are prerequisites for the first debugger slice.
+- Other translators, customer builds, server variants and remote attach are add-ons.
+  When introduced, preserve their artifacts rather than silently rebuilding them
+  with the reference translator. Oracle remains after the working DB2 baseline.
 
-## Delivery steps and acceptance gates
+## Current delivery order and acceptance gates
 
-| Step | Deliverable | Acceptance gate |
+Canonical source is now the private Gitea repository. GitHub receives only the
+allowlisted documentation export; migration and publishing were manually verified.
+The review baseline above is historical, not the new Gitea root commit.
+
+| Step | Current state | Remaining acceptance gate |
 | --- | --- | --- |
-| 1 — started | Manual examples, honest coverage matrix, receiver-based member completion | Two iterator types do not leak APIs; ordinary Java receiver uses its own type; packaged IDE check still required |
-| 2 | Java editor architecture spike: shared-document Java view/projection versus Java-oriented PSI | Imports, overloads, generics, chained calls and Java-to-SQLJ API lookup work before translation; incomplete SQL preserves surrounding Java; choose architecture from evidence |
-| 3 | Shared semantic model for host bindings and SQLJ declarations | Correct lexical scope/shadowing, bind expressions, contexts, named/positional iterators, indicators/index forms; navigation and completion use identical symbols |
-| 4 | Artifact-driven debugger mapping | Real JDI breakpoint hit, SQLJ source location, Step Over, locals and evaluation for supported translator output |
-| 5 | DB2 database insight | Selected dialect/data source/schema, aliases, tables/columns, functions, offline behavior and SQLJ-aware SQL projection |
-| 6 | Cross-language references and refactoring | Find Usages/Rename across Java and SQLJ; no generated-file edits or duplicate symbols |
-| 7 | Toolchain and release hardening | PATH detection, multi-module roots, stale outputs, translator diagnostics, compatibility and packaged-plugin verification |
+| 1 — examples and architecture | Shared Java view, navigation/completion, error highlighting and scope probes manually exercised | Keep regressions and invalid-code scenarios in every relevant slice; retain the development opt-in until the supported wizard flow is promoted |
+| 2 — Java/SQLJ semantics (current) | Host expressions, OUT/INOUT writability, indicators and header expressions implemented; context role/API and constructor-family patches delivered, acceptance pending | Run the latest patches in the reference IDE with the container runtime; complete iterator APIs, context implements/profile APIs, custom attributes and result/bind compatibility; deduplicate generated symbols and validate module visibility |
+| 3 — container debugger artifacts | Existing debugger extension is only infrastructure; no accepted SQLJ breakpoint session | Inspect matching SQLJ/generated Java/class files, translator options and javap metadata from the wizard's DB2 container only; no customer comparison required |
+| 4 — out-of-the-box DB2 debugging | Primary acceptance goal after container artifact investigation | Fresh wizard project: build/run, Debug, real breakpoint hit in .sqlj, Step Over/Into, locals and evaluation; automatic source mapping and stale-artifact handling with no manual mapping setup |
+| 5 — DB2 SQL integration | SQL injection and indicator-pair projection exist; database-aware integration remains partial | Complete the container baseline's schema/table/column completion, aliases/types and offline behavior first; z/OS/IBM i and customer-specific toolchain/binder forms are later add-ons |
+| 6 — cross-language operations | Go to Declaration is implemented; full usages/rename is pending | Find Usages/Rename across Java/SQLJ with visibility/conflict checks and no edits to generated files |
+| 7 — toolchain and release hardening | Wizard executable baseline and private-source/public-docs workflow work | Wizard source roots/runtime visibility and installed PATH discovery before container fallback; no hidden marker or hand setup in the accepted default flow; multi-module/remote/customer variants follow as add-ons |
+| 8 — Oracle SQLJ (explicitly deferred) | No Oracle-specific integration work in the current series | Start only after DB2/Java integration and artifact-driven debugging are implemented and accepted; then assess Oracle translator/runtime/binding, dialect and debug metadata separately |
 
-Step 1 is a bounded correction on the existing projection, not the architecture
-choice for step 2. It does not yet promise complete Java accessibility rules,
-static/instance filtering, overload-aware insertion or Java inspections.
+Current code is a growing integration prototype, not a declaration that steps 2–7
+are complete. Automated helper tests do not replace installed-plugin testing or a
+real debugger session. Java files in a mixed src/main/sqlj root remain a low-priority
+IntelliJ integration case; ordinary Java fixtures belong under src/main/java.
 
-## Debugger portability
+## Debugger baseline: wizard plus DB2 container first
 
-Collect a minimal SQLJ source, matching generated Java and class files, build
-options, translator/JDK versions and `javap -v -l` output for each supported setup.
-Use synthetic/anonymized reproductions for customer toolchains.
-Inspect SourceFile, LineNumberTable, LocalVariableTable and SourceDebugExtension;
-check JDI available strata and source names before choosing a mapping strategy.
+The first implementation and acceptance run use only the artifacts produced by
+the wizard's DB2 container toolchain. Collect the minimal SQLJ source, matching
+generated Java/class files, build options, translator/JDK versions and `javap -v -l`
+output for this single baseline. Inspect SourceFile, LineNumberTable,
+LocalVariableTable and SourceDebugExtension plus JDI strata/source names, then
+choose the source mapping from that evidence. Do not wait for customer artifacts
+or compare independent translators before implementing the first working debugger.
 
-Prefer verified translator mappings. Use an adapter for generated source metadata
-only when it is demonstrably reliable. With no reliable mapping, report that
-limitation instead of assuming identical SQLJ/Java line numbers. Detect stale or
-mismatched artifacts. Local and remote attach must use the same mapping model.
-A database bind step and a translator's debug metadata are separate concerns.
+A fresh wizard project is the primary user journey. Its build/run flow and Debug
+action must resolve runtime libraries, source roots, generated artifacts and SQLJ
+source positions automatically. The current shared Java view still requires its
+experimental marker; removing that manual requirement from the supported wizard
+flow is an explicit acceptance task, not an already completed feature. Breakpoints
+must actually hit in .sqlj and stepping, locals/evaluation and stale-build handling
+must be checked in the installed plugin. Merely registering a PositionManager or
+passing offset-helper tests is insufficient.
+
+Do not guess that SQLJ and Java line numbers match. Use the metadata of the known
+container translator and report unsupported mappings clearly. Keep the mapping
+boundary separable, but implement only the concrete baseline adapter first.
+Alternate translators, customer build artifacts, bind variants and remote attach
+are additions after this path works. When Oracle is evaluated after DB2 integration
+and debugging acceptance, extend that boundary for its real translator/runtime
+metadata. Existing customer artifacts must never be silently regenerated using a
+different translator. Database binding and JVM debug metadata are distinct.
 
 ## Verification
 
@@ -345,3 +369,124 @@ ordered source ranges for array/field/simple indicators, mixed pairs/ordinary
 hosts, input value lists and trailing hosts. These tests do not replace manual
 Database Tools/DB2 annotator validation in the installed IDE. Author Gradle
 execution remains blocked by Network is unreachable during download.
+
+### Connection and execution context roles — 2026-10-18
+
+Step 3 now includes static runtime-role checks in marked shared-view SQLJ headers.
+A single expression accepts either sqlj.runtime.ConnectionContext or
+sqlj.runtime.ExecutionContext; a pair requires connection first, execution second.
+The check follows resolved Java inheritance and type-parameter bounds, and
+recognizes untranslated #sql context declarations as connection contexts.
+Empty slots and more than two expressions receive structural diagnostics.
+Unresolved Java references/syntax and missing runtime definitions suppress
+secondary role errors. No SQLJ runtime code is shipped with the plugin.
+
+Thirty-two daemon tests cover roles, ordering, JDBC-vs-SQLJ, methods, indexed targets,
+inheritance/generics, synthetic contexts, corrections and expression-only ranges.
+The earlier header insight fixture now uses explicit runtime-role test doubles;
+manual probes use the user's actual runtime on the module classpath. DB2 runtime
+behavior, null/default-context availability, role-filtered completion, complete
+synthetic runtime APIs and translator-specific expression restrictions remain
+separate work. This does not implement debugger source mapping. No SDK upgrade.
+Author-side Java tests remain blocked by the Gradle distribution download; run
+test/buildPlugin and the installed-plugin scenarios before accepting this slice.
+
+### Synthetic connection contexts inherit the installed runtime API
+
+Untranslated context classes now expose sqlj.runtime.ConnectionContext as an
+implemented interface, including Java supertype queries and assignability. Java
+method/field lookup and visible signatures use the platform's inheritance helpers.
+Inherited runtime methods/constants retain their original PSI, exception lists,
+overloads and navigation targets; generated default-context methods still point
+to the SQLJ declaration. The runtime is resolved within the SQLJ source's scope,
+not deliberately drawn from another module's dependency set. No concrete runtime
+implementation superclass is assumed.
+
+With no interface available, the existing lightweight fallback remains and gains
+getExecutionContext plus close(). When a real interface is available, it supplies
+the instance API instead of being shadowed by fallback methods. Context constructor
+coverage remains partial and is not advertised as a complete generated class API.
+
+Twenty tests exercise supertype/inheritance queries, Java assignability and actual
+consumer diagnostics, runtime method/constant navigation, close overloads and
+exceptions, method signatures, completion/chaining, shared SQLJ headers, missing
+runtime fallback and runtime additions/edits. Manual fixtures use the real module
+runtime and split Java/SQLJ source roots. Java tests/build remain unexecuted here
+because the Gradle distribution download reports Network is unreachable.
+Oracle runtime/translator adapters remain deferred until the DB2 integration and
+debugger acceptance gates above have passed.
+
+### Context constructor families and with options
+
+The DB2 declaration model now distinguishes URL contexts (five constructors) and
+literal-dataSource contexts (four constructors), including both JDBC Connection
+and SQLJ ConnectionContext wrapping. All modeled constructors are public, declare
+SQLException and retain SQLJ declaration navigation. Constructor families refresh
+when the option mode changes, including previously returned model objects.
+
+A shared token-based option model handles comments, string commas, duplicate
+attribute names and the DB2 dataSource string literal. Custom Java-ID attributes
+are accepted; their Java constant-expression semantics are not evaluated yet.
+The with parser balances nested parentheses and stops recovery at statement/new
+SQLJ boundaries. Invalid/incomplete options expose only common wrapper constructors.
+Manual constructor fixtures use separate Java/SQLJ roots and intentionally bad
+calls/options. They are editor fixtures, not JNDI registration or an executable
+wizard extension.
+
+The tutorial now distinguishes declared attributes from actual JDBC read-only and
+isolation settings. The debugger plan is explicitly container-first: a working
+out-of-the-box wizard project is mandatory before alternate/customer toolchains,
+remote attach and Oracle adapters. No debugger implementation or wizard-default
+behavior is changed by this constructor patch.
+
+### Iterator runtime interfaces and declaration checks
+
+The iterator slice models NamedIterator/PositionedIterator inheritance from the
+module's runtime, exposing inherited ResultSetIterator methods/constants and
+retaining actual library navigation/exception signatures. Named accessors still
+point to their SQLJ columns. Context and iterator classes now share the same
+runtime-inheritance implementation, preserving the context behavior from the
+previous patch. Offline iterator methods remain a fallback only.
+
+All columns now determine named/positional kind; mixed declarations are neither.
+Diagnostics cover mixed columns, case-insensitive duplicate names, empty lists
+and void columns. Duplicate accessors are not published twice. Comments are
+excluded from type/name extraction; parser recovery retains following SQLJ clauses
+and diagnoses trailing commas. Twenty-two tests cover Java assignability, runtime
+API navigation/completion, column typing, invalid declarations and fallback behavior.
+Manual fixtures live in examples/java-view/iterators, with only their README added
+to the public documentation allowlist. Java tests still need the user's build;
+local Gradle remains blocked by its distribution download.
+
+Next: explicit iterator implements/with semantics, then the known DB2 container
+artifacts for the out-of-the-box wizard debugger. FETCH/result conversion checks
+remain pending and must not be inferred from runtime interface support. No alternate
+toolchain comparisons or Oracle work are required before that debugger baseline.
+
+### Iterator implements/with: DB2 declaration order and runtime roles
+
+The parser now supports the DB2 prefix order (iterator name, implements, with,
+column list). The earlier suffix prototype is retained for editor compatibility;
+it is not advertised as container-translator proof. Implemented interface names
+have PSI references using Java import/class scope. Resolved explicit interfaces
+participate in context/iterator Java inheritance, completion and source navigation.
+Unresolved names, non-interface classes and duplicate resolved aliases receive
+errors. Generic implemented types, import insertion and rename remain pending.
+
+Context and iterator with clauses share structural parsing, preserving context
+constructor mode behavior. Iterator checks cover duplicate/missing attributes,
+obviously invalid boolean/sensitivity literals, literal updateColumns and its
+ForUpdate requirement, context-only dataSource misuse and known dynamic/SENSITIVE
+constraints. Unresolved dependencies defer cascades. dynamic=true warns about DB2
+LUW support rather than rejecting every potential z/OS target. Complex constant
+expressions/aliases, schema names and actual driver/server effects remain toolchain
+checks. No Oracle integration or broader server-profile framework is introduced.
+
+Twenty-seven new tests and manual IteratorOptions/consumer fixtures cover these
+paths. The next concrete task is wizard cold-start reliability before debugger
+work: the current template runs compose up -d, permits only three minutes of
+Spring readiness waiting and has a thirty-second health start period. Inspect and
+fix actual database-readiness coordination and initialization budgets, then verify
+fresh-container first launch as well as warm launch. This is a source-level finding,
+not a reproduced DB2-container failure in the author environment. No startup or
+readiness behavior is changed by this iterator patch.

@@ -95,14 +95,33 @@ public class TransferService {
 
 ## 3. Context Configuration with `with` Clause
 
-Contexts can specify connection properties and isolation parameters at declaration time:
+A DB2 context can name a separately configured JNDI DataSource:
 
 ```java
-#sql public context ReadOnlyReportingContext with (
-    readOnly = true,
-    isolation = "TRANSACTION_READ_UNCOMMITTED"
-);
+#sql public context ReportingContext with (dataSource = "jdbc/reporting");
+
+// The JNDI resource must already exist in the application environment.
+ReportingContext context = new ReportingContext();
 ```
+
+This form supplies parameterless and user/password constructors in addition to
+wrappers for an existing JDBC Connection or SQLJ ConnectionContext. Contexts
+without dataSource use the URL-based constructor set instead. All these
+constructors declare SQLException.
+
+Custom with attributes do not automatically configure JDBC behavior. Set read-only
+or transaction isolation on the actual connection where appropriate, for example:
+
+```java
+java.sql.Connection connection = context.getConnection();
+connection.setReadOnly(true);
+connection.setTransactionIsolation(java.sql.Connection.TRANSACTION_READ_COMMITTED);
+```
+
+Whether those settings are supported and how they interact with pooling and
+transactions depends on the driver/application. The wizard's standard DB2
+container example does not require JNDI setup; keep that path as the first runnable
+and debuggable baseline. The JNDI variant is an additional editor/API scenario.
 
 ---
 

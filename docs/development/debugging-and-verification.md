@@ -132,3 +132,35 @@ edit followed by rebuild:
 Test concurrent/deferred contexts with their genuine thread and transaction
 boundaries. Remote attach, module source attachment and Hot Swap need additional
 acceptance scenarios; source mapping alone is not evidence for them.
+
+## Wizard DB2 cold-start acceptance
+
+Generate a **new** starter after installing the updated plugin; existing starter projects
+are not rewritten. Test the first initialization in an isolated Docker environment without
+removing an existing database. Run `mvn spring-boot:run` and keep the complete output.
+
+- Before container startup, Maven explains that initialization may take minutes and prints
+  the readiness budget and a command to follow DB2 logs in another terminal.
+- Maven uses `docker compose up --wait --wait-timeout 900 db2`. Extraction and SQLJ translation
+  must not run after a failed health check. Health requires SAMPLE connectivity and `VALUES 1`.
+- After Java starts, an immediate notice and a 15-second elapsed-time heartbeat remain visible
+  until the application reports ready or failed. The heartbeat covers application initialization,
+  including Flyway; it does not claim that DB2 has reached a particular initialization stage.
+- Both Maven and Spring allow 15 minutes for readiness. Image download/build time is additional.
+  Health-check failures have a 10-minute initialization grace period; successful checks can
+  make a warm database ready immediately.
+- On success, check the page at `http://localhost:8080` and verify seeded products. Restart without
+  recreating the container and confirm readiness is detected promptly, without a fixed sleep.
+- With Docker stopped, confirm Maven fails visibly and does not extract/translate. For timeout
+  handling use a short readiness budget in an isolated test environment; preserve the logs and
+  inspect `docker compose ps` and `docker compose logs --tail 100 db2`.
+- Confirm heartbeat output stops after success and failure. With
+  `spring.docker.compose.enabled=false`, the Java reporter stays silent; Maven's separate
+  container translator fallback is still active unless a local translator is available.
+
+Configuration: `-Ddb2.startup.timeout.seconds=1200` changes Maven's Compose wait budget;
+`spring.docker.compose.readiness.timeout=20m` changes Spring's independent readiness budget.
+Neither setting changes the image health-check grace period/retry policy automatically.
+
+Reference: [Compose up wait options](https://docs.docker.com/reference/cli/docker/compose/up/)
+and [Spring Boot Docker Compose properties](https://docs.spring.io/spring-boot/3.4/appendix/application-properties/index.html#appendix.application-properties.docker-compose).
