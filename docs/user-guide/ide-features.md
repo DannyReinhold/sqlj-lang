@@ -51,13 +51,56 @@ Inside any `#sql { ... }` execution block, IntelliJ injects the database languag
 
 ## 4. Source-Level Debugging
 
-You can debug `.sqlj` files directly without needing to inspect intermediate generated `.java` files:
+SQLJ source breakpoints and automatic Maven preparation have been confirmed in
+an installed-plugin run of the DB2 wizard application. This is a Java debugger
+integration, independent of Spring Boot. Use executable Java statements or the
+opening `#sql` line; declarations and SQL continuation lines may not be executable.
+Full stepping and expression-evaluation acceptance is still in progress.
 
-1. **Line Breakpoints**: Click on the editor gutter on any executable Java or `#sql` line.
-2. **Debugger Stepping**: Use `Step Over` (`F8`) and `Step Into` (`F7`) to navigate between Java and SQL statements.
-3. **Expression Evaluation & Watches**: Evaluate expressions (`Alt+F8`) within the live lexical context of the stack frame.
-4. **Position Mapping**: The debugger bridge accurately maps JVM bytecode execution points back to original `.sqlj` line offsets.
-5. **Stepping Filter**: Automatically skips over internal SQLJ runtime classes (`sqlj.runtime.*`, `com.ibm.db2.jcc.sqlj.*`) when stepping through code.
+See **[Debugging Java, Spring and WebSphere Liberty](debugging-project-types.md)**
+for the project-specific IDE/Maven setup, WAR/JAR deployment and Remote JVM Debug
+instructions. A Liberty session remains a separate acceptance gate.
+
+### Build preparation before Run/Debug
+
+New wizard projects include **SQLJ Demo (Maven + SMAP)** in the run configuration
+selector. Import `pom.xml` as a Maven project, select that configuration and click
+Run or Debug. It executes `clean process-classes`, including SQLJ translation,
+Java compilation and SMAP installation. The application starts only after a
+successful build. The first DB2 initialization can take 15 minutes; downloads and
+compilation add to that time. Later launches still perform a clean build.
+
+For an **existing project**, open **Run > Edit Configurations**, select its
+Java/Application or Spring Boot configuration and use **Modify options > Add
+before launch task > SQLJ: Prepare Debug Build**. Enter the absolute path to the
+appropriate Maven POM and the goals used by your SQLJ debug build. Keep this task
+last, after any ordinary Build task, so that Java compilation cannot overwrite
+installed source maps afterward. A Build task after preparation blocks launch
+with a notification. The wizard disables its redundant ordinary Build task.
+If an earlier IDE Build cannot compile a project before SQLJ generation, disable
+that redundant task and let the Maven preparation perform the complete build.
+
+The plugin task is reusable across Maven projects and has no dependency on the
+starter's package or main class. It uses IntelliJ's Maven runner/JDK/settings and
+saves modified documents before the build. Maven support must be enabled and the
+POM must be imported. The selected Maven goals must actually translate SQLJ,
+compile Java and install valid debug metadata; adding this task does not retrofit
+arbitrary customer POMs. Custom tools and Gradle remain later adapters. Remote JVM
+Debug uses the same Java debugger bridge, but the deployed classes must already
+contain matching metadata; the task does not perform remote deployment.
+Existing configurations are changed only when you explicitly add/configure the task.
+
+For an older **wizard starter**, run from the plugin repository in PowerShell:
+
+```powershell
+py -3 scripts\install_starter_debug_configuration.py --project "C:\Users\danny\tmp\sqljtest013"
+```
+
+This creates `.run/SQLJ-Demo.run.xml` without replacing existing configurations.
+Use `--module "actual-module-name"` if IntelliJ's module was renamed. Select
+**SQLJ Demo (Maven + SMAP)** afterward. The starter must already have the current
+`tools/SqljDebugInfo.java` and Maven SMAP build integration. A manually edited
+configuration with the same filename is left unchanged.
 
 ---
 

@@ -11,6 +11,16 @@ The `sqlj-lang` IntelliJ plugin provides first-class developer tooling, intellig
 
 ---
 
+
+> [!WARNING]
+> **DB2 DEMO: THE FIRST START CAN TAKE MANY MINUTES. PLEASE DO NOT ABORT EARLY.**
+> The first image download and SAMPLE database initialization can be very slow.
+> The generated starter allows **15 minutes for database readiness after container startup**;
+> image download/build time is additional, so a complete cold launch can exceed 15 minutes.
+> Keep the build running. In a second terminal, use `docker compose logs --follow db2`
+> to see initialization progress. A running container is not yet a ready database.
+> Later starts normally reuse the initialized database and become ready much sooner.
+
 ## What is SQLJ?
 
 SQLJ (ANSI/ISO SQL standard Part 0) allows developers to write static SQL statements directly embedded within Java source code using `#sql` directives. Rather than assembling fragile dynamic SQL strings with standard JDBC, SQLJ delivers:

@@ -38,7 +38,7 @@ The review baseline above is historical, not the new Gitea root commit.
 | --- | --- | --- |
 | 1 — examples and architecture | Shared Java view, navigation/completion, error highlighting and scope probes manually exercised | Keep regressions and invalid-code scenarios in every relevant slice; retain the development opt-in until the supported wizard flow is promoted |
 | 2 — Java/SQLJ semantics (current) | Host expressions, OUT/INOUT writability, indicators and header expressions implemented; context role/API and constructor-family patches delivered, acceptance pending | Run the latest patches in the reference IDE with the container runtime; complete iterator APIs, context implements/profile APIs, custom attributes and result/bind compatibility; deduplicate generated symbols and validate module visibility |
-| 3 — container debugger artifacts | Existing debugger extension is only infrastructure; no accepted SQLJ breakpoint session | Inspect matching SQLJ/generated Java/class files, translator options and javap metadata from the wizard's DB2 container only; no customer comparison required |
+| 3 — container debugger artifacts | Runtime stratum mapping and controlled JDI test implemented; wizard requests SMAP; post-compile helper implemented; actual container output/IDE acceptance pending | Inspect matching SQLJ/generated Java/class files, translator options and javap metadata from the wizard's DB2 container only; no customer comparison required |
 | 4 — out-of-the-box DB2 debugging | Primary acceptance goal after container artifact investigation | Fresh wizard project: build/run, Debug, real breakpoint hit in .sqlj, Step Over/Into, locals and evaluation; automatic source mapping and stale-artifact handling with no manual mapping setup |
 | 5 — DB2 SQL integration | SQL injection and indicator-pair projection exist; database-aware integration remains partial | Complete the container baseline's schema/table/column completion, aliases/types and offline behavior first; z/OS/IBM i and customer-specific toolchain/binder forms are later add-ons |
 | 6 — cross-language operations | Go to Declaration is implemented; full usages/rename is pending | Find Usages/Rename across Java/SQLJ with visibility/conflict checks and no edits to generated files |
@@ -490,3 +490,147 @@ fix actual database-readiness coordination and initialization budgets, then veri
 fresh-container first launch as well as warm launch. This is a source-level finding,
 not a reproduced DB2-container failure in the author environment. No startup or
 readiness behavior is changed by this iterator patch.
+
+### First debugger slice: runtime coordinates before breakpoint guesses
+
+The existing position manager treated any JVM line as a SQLJ source line, even when
+SourceFile still named generated Java. The first slice removes that assumption.
+Source lookup now requires matching package/class and exact source name, rejects
+ambiguous duplicate qualified sources and out-of-range lines, and defers while
+indices are unavailable. JDI source names/lines and breakpoint locations use explicit
+available strata; the VM's global default stratum cannot silently change the mapping.
+Plain generated Java lines are left to the Java debugger. Conflicting SQLJ strata
+are rejected. Source fingerprints are now checked for the generated wizard pipeline described
+below; native metadata without fingerprints has no freshness guarantee.
+
+Both wizard translation profiles now request IBM's `-smap=yes`. This emits a sidecar
+mapping; with `-compile=false`, subsequent javac does not automatically attach it to
+the class. The generated helper described below now installs that sidecar. The fresh wizard's
+installed-plugin breakpoint acceptance remains pending. Line-number rewriting with
+`-linemap=yes` is not used; Java line tables remain intact.
+
+| Slice | Current state | Acceptance |
+| --- | --- | --- |
+| Runtime coordinate contract | Implemented; 16 pure-JDI contract tests plus a real child-JVM breakpoint test | SQLJ line 12 maps to generated Java line 5; actual breakpoint hit and local value checked |
+| Container translator SMAP output | Requested in both generated profiles; actual container emission pending | Preserve generated `.java`, `.java.smap`, `.class` from one clean wizard build |
+| Automatic post-javac mapping | Generated helper implemented; container/IDE acceptance pending | Embed validated container SMAP in matching class files and nested classes; track source/build freshness; preserve ordinary Java debugging |
+| Installed-plugin breakpoint acceptance | Pending | Debug the wizard app, hit SQLJ Java/SQL lines and repeated/multiline SQL; unloaded/loaded classes; correct stack source |
+| Stepping and evaluation | Existing scaffolding only; pending validation | Step Over/Into, parameters/locals/this, watches/evaluation in the executable Java scope; changed sources fail safely |
+
+The JVM test uses a controlled synthetic JSR-45 fixture and does not require DB2.
+It proves the JDI coordinate contract, not IBM translator compatibility or installed
+IntelliJ behavior. Additional platform tests cover package/source ambiguity and
+package parsing independently of whitespace. Full SDK compilation/tests and a real
+container debugger session still require the reference environment.
+
+### Second debugger slice: generated post-javac build helper
+
+The wizard now includes a dependency-free MIT Java build helper. Before translation
+it captures source fingerprints and clears stale sidecar maps; after javac it validates
+and embeds fresh SMAPs plus source hashes in matching classes, including nested
+classes. SourceFile/Java line tables/locals are preserved. The plugin checks hashes
+from loaded runtime metadata against current editor text before SQLJ mapping.
+The first supported map shape is one stratum and one SQLJ input per map; unsupported
+or missing maps fail visibly instead of silently pretending that debugging is enabled.
+
+The real-JVM test uses that generated helper and an external Gradle-toolchain javac,
+fixing compiler discovery under the IntelliJ test classloader. Helper tests cover
+idempotence, nested/ordinary Java classes, invalid/missing/stale maps, source changes,
+old compiled classes, newline differences and paths containing spaces. These tests
+still use a synthetic map, not an IBM container artifact.
+
+Next gate: inspect a clean wizard build's actual container SMAP/classes, run the
+installed plugin with real SQLJ breakpoints, then wire the Maven preparation into
+IDE before-launch behavior. Full Step Over/Into and Java-scope evaluation follow.
+Automatic class-loader disambiguation for duplicate qualified sources, native
+unfingerprinted toolchains, multi-input/multi-stratum translator formats, customer
+artifacts and Oracle remain later work. The first DB2 out-of-the-box debugger goal
+is not marked complete by post-compile helper tests alone.
+
+### Wizard integration corrections after the container run
+
+The user's healthcheck log proved that the query succeeded but cleanup in a
+separate CLP invocation returned SQL1024N. The probe is now one stop-on-error CLP
+batch, and a guarded repair script updates the known old check in existing
+starters while retaining a backup. Readiness budgets stay unchanged.
+
+The wizard now registers pom.xml with Maven after project startup, declares source
+roots and inherits the project SDK. Maven integration is optional for the plugin;
+its bridge uses the bundled 2024.3 MavenProjectsManager API. New starter SQLJ files
+enable the shared Java view, and src/main/sqlj survives Maven source-root import.
+Class navigation from the known generated Maven directory maps by unique qualified
+class name to the original SQLJ identifier in the same content root. Generated
+member/source-symbol deduplication and automatic debugger launch preparation are
+still pending. Verify a new wizard project's Maven import and class navigation
+before and after Maven translation in the installed plugin.
+
+### IDE breakpoint-handler bridge
+
+Installed testing found that source-level breakpoints still did not suspend. Code
+inspection identified a missing JavaBreakpointHandlerFactory: IntelliJ dispatches
+by exact breakpoint-type class, so extending JavaLineBreakpointType alone left
+SQLJ breakpoints without a Java handler. The new bridge registers the exact SQLJ
+type with the standard Java request lifecycle. SQLJ has priority for its own files,
+uses all-position line properties and checks mapped file/line directly instead of
+running Java-only method/lambda PSI checks on SQLJ base PSI.
+
+SDK regression coverage now includes handler extension discovery/type dispatch and
+actual native Java LineBreakpoint conversion/source matching. These SDK tests need
+the reference build environment; the standalone JDI tests do not exercise this
+registration path. Installed breakpoint hits remain the next acceptance gate.
+For the manual gate, preserve Maven's mapped output and remove an intervening
+Java-only Before launch build. Automatic IDE Maven preparation, full stepping and
+evaluation remain pending; no DB2 debugger completion is claimed by this bridge.
+
+
+### DB2 breakpoint acceptance and reusable launch preparation
+
+Installed-plugin feedback on 2026-10-18 confirms that SQLJ source breakpoints now
+hit in the DB2 wizard application after normalizing the observed overlapping DB2
+SMAP block ranges. Java debugging and navigation to ProductRepository.sqlj also
+work. That acceptance used a manual Maven build with the ordinary before-launch
+IDE Build disabled; it does not yet establish automatic launch or full stepping.
+
+The next patch adds the general plugin task **SQLJ: Prepare Debug Build** with
+per-run-configuration Maven POM/goals and an optional Maven bridge. The wizard
+supplies its defaults through a shared Application run configuration. Older
+starters can install that configuration without replacing their existing ones;
+existing customer projects can add the task to their own launch configuration.
+Their build must supply translation and debug metadata installation. Arbitrary
+build/toolchain retrofits are outside this initial Maven orchestration adapter.
+
+Current gate: validate automatic launch, changed-source rebuild and failed-build
+launch blocking in the installed plugin. Next: Step Over/Into, stack frames,
+locals and expression evaluation. Customer toolchains, remote attach and Oracle
+follow the DB2 container baseline; Oracle has not been started.
+
+
+### Project-type scope and server acceptance
+
+The installed-plugin DB2 wizard's SQLJ breakpoints and automatic Maven before-launch
+preparation are now user-confirmed. Spring Boot is only that acceptance fixture,
+not a dependency of the Java/JDI debugger integration. Plain Java, Spring without
+Boot and Spring hosted by WebSphere Liberty (WLP) remain explicit targets.
+
+[The project-type debugging guide](../user-guide/debugging-project-types.md)
+records IDE/Maven prerequisites and the build/package/deploy/attach boundary.
+Record a dedicated Liberty acceptance run before claiming it is validated:
+Java and SQLJ breakpoints, source edits plus rebuild/redeployment, nested iterator
+classes, source freshness, duplicate class names/class loaders and stop/reattach.
+The initial server run uses a controlled packaged artifact; dev-mode recompilation
+and HotSwap are separate follow-up integration work. A generic before-launch Maven
+build does not by itself deploy to or update an already running server.
+
+This adds server setup/acceptance scope without starting Oracle integration or
+requiring a Boot dependency in general plugin functionality.
+
+
+### Stepping policy and variable/frame regression
+
+The next patch scopes the extra stepping filter to SQLJ/DB2 runtime locations and
+uses STEP_OUT there. The previous always-applicable STEP_INTO behavior is removed
+so unrelated Java, Spring and Liberty code retains native stepping behavior.
+A controlled real-JVM fixture covers mapped Step Over/Into/Out and locals/caller
+frames. [Manual acceptance](../../examples/debugging/README.md) remains required
+for IntelliJ commands against the actual DB2 application. This does not complete
+Watches/Evaluate Expression or the separate Liberty deployment/attach acceptance.

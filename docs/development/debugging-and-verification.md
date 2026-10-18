@@ -135,6 +135,15 @@ acceptance scenarios; source mapping alone is not evidence for them.
 
 ## Wizard DB2 cold-start acceptance
 
+> [!WARNING]
+> **FIRST DB2 START: ALLOW MANY MINUTES — PLEASE DO NOT ABORT EARLY.**
+> Downloading the image and creating SAMPLE can take a very long time. The starter
+> allows **15 minutes for readiness after container startup**, plus image download
+> and build time. **The complete first launch can exceed 15 minutes.** A running
+> container is not yet a ready database. Keep the build running and use
+> `docker compose logs --follow db2` in a second terminal to see initialization.
+> Later starts normally reuse the database and become ready much sooner.
+
 Generate a **new** starter after installing the updated plugin; existing starter projects
 are not rewritten. Test the first initialization in an isolated Docker environment without
 removing an existing database. Run `mvn spring-boot:run` and keep the complete output.
@@ -164,3 +173,236 @@ Neither setting changes the image health-check grace period/retry policy automat
 
 Reference: [Compose up wait options](https://docs.docker.com/reference/cli/docker/compose/up/)
 and [Spring Boot Docker Compose properties](https://docs.spring.io/spring-boot/3.4/appendix/application-properties/index.html#appendix.application-properties.docker-compose).
+
+## First SQLJ runtime mapping patch
+
+The position manager now asks JDI for explicit source strata and only displays SQLJ
+coordinates that the loaded class advertises. A generated `Dao.java:103` is never
+assumed to mean `Dao.sqlj:103`. Package/name ambiguity, conflicting strata and source
+lines outside the current document defer rather than select an arbitrary SQLJ file.
+The new wizard pipeline checks embedded source fingerprints as described below,
+including edits that preserve line counts. Arbitrary bytecode changes and different
+class loaders with the same name are not authenticated by a source fingerprint.
+
+The `SqljDebugLocationsTest` suite checks missing/invalid source information, explicit
+strata, native SQLJ SourceFile metadata, exact breakpoint lines and ambiguity.
+`SqljDebugJdiTest` compiles a small fixture with debug info, attaches a test-only SMAP,
+launches a local JVM, sets an actual SQLJ breakpoint and checks the stopped local value.
+It uses a JDK and loopback JDI connection, with a bounded event wait and process cleanup.
+It is independent of DB2 and does not prove an installed IntelliJ breakpoint session.
+
+For the generated wizard build, both translator profiles request `-smap=yes`.
+After installing this plugin and generating a new starter, run `mvn clean package`
+and preserve the generated `.java.smap` files, generated Java and compiled classes.
+Do not edit generated lines or replace Java line numbers manually. A separate SMAP
+file alone does not enable JVM strata: the generated build helper below performs
+post-javac embedding. Until the actual container/installed-plugin acceptance passes,
+ordinary generated-Java debugging remains the fallback.
+Existing generated applications are not rewritten by installing a plugin update.
+
+Reference: [IBM SQLJ translator options](https://www.ibm.com/docs/en/db2/11.5.x?topic=preparation-sqlj-sqlj-translator),
+[JDI source strata](https://docs.oracle.com/en/java/javase/21/docs/api/jdk.jdi/com/sun/jdi/Location.html)
+and [JDI source-line lookup](https://docs.oracle.com/en/java/javase/21/docs/api/jdk.jdi/com/sun/jdi/ReferenceType.html).
+The JDI documentation is used for the JVM API, not as an Oracle SQLJ integration.
+
+## Automatic wizard SMAP installation and source freshness
+
+The starter now writes `tools/SqljDebugInfo.java` under MIT. It runs as a standard
+JDK source-file program with no dependency on the installed IntelliJ plugin.
+`initialize` snapshots canonical UTF-8 SQLJ source hashes and removes old sidecar
+maps. Both translation profiles request `-smap=yes -linemap=no`; Maven then compiles
+with source, line and local-variable debug information. At `process-classes`, the
+helper validates the fresh sidecars and installs SourceDebugExtension in matching
+package/SourceFile classes, including nested classes. Ordinary Java SourceFile,
+line tables, locals and bytecode are preserved; Java remains the default source stratum. Running install twice is idempotent.
+
+The current validated input shape is one stratum, one SQLJ source and standard
+JSR-45 file/line tables per map. Repeated/incremented line entries are supported.
+Unknown/missing maps, ambiguous source names, source edits during the build,
+out-of-range maps, missing compiled classes and classes older than generated Java
+fail visibly before modifying class files. This is a trusted-build pipeline, not
+cryptographic authentication of arbitrary class files or proof of a translator's
+semantic correctness. Actual DB2 map-format compatibility still needs the container run.
+
+A vendor section in the loaded class's SMAP stores the source path and SHA-256.
+The plugin compares that hash with current editor text, normalizing BOM/newline
+style. A mismatch rejects SQLJ breakpoint/source mapping, including same-line-count
+edits; rebuild with Maven. Older native SQLJ metadata without this vendor section
+remains usable but has no source-freshness guarantee. Generated files alone are
+never used to assert which bytecode is currently loaded.
+
+Use `mvn clean package`, `mvn process-classes`, or `mvn spring-boot:run` in a **new**
+wizard project. The Boot run goal forks through test compilation, which includes
+process-classes. `mvn compile` and direct compiler goals stop too early. For an
+IntelliJ Debug launch, execute Maven through process-classes first and avoid a
+subsequent Java-only rebuild. Automatic IDEA before-launch wiring is still pending;
+this patch is not the final out-of-the-box debugger acceptance gate.
+
+The JVM smoke test now invokes the external javac from Gradle's configured JDK
+compiler toolchain. It no longer depends on `ToolProvider.getSystemJavaCompiler()`
+inside IntelliJ's test classloader. Its actual generated build helper installs the
+fixture map; a child JVM then hits SQLJ line 12 / Java line 5 and exposes local value
+21. Tests cover nested classes, untouched Java classes, idempotence, invalid/missing
+maps, changed input, old classes, Windows-style newlines and paths containing spaces.
+This remains a controlled fixture; the DB2 container/installed-plugin run is separate.
+
+Reference: [SourceDebugExtension class-file attribute](https://docs.oracle.com/javase/specs/jvms/se21/html/jvms-4.html#jvms-4.7.11).
+
+## Wizard regression: healthy DB2 rejected by cleanup
+
+The installed-container evidence showed successful `CONNECT TO SAMPLE` and
+`VALUES 1`, followed by SQL1024N/exit 4 from the separate `connect reset` invocation.
+Compose consequently never became healthy even though the query worked. The new
+healthcheck sends CONNECT, VALUES, CONNECT RESET and TERMINATE to **one** CLP
+invocation (`db2 -st`). Semicolon termination and stop-on-error keep real connection
+and SQL failures visible without relying on session state across frontend invocations.
+The shell contract test reproduces the former cleanup failure and checks success,
+connection failure and query failure for the new batch. It is a controlled CLI
+substitute, not a DB2-container acceptance run.
+
+Existing generated projects can repair the exact old healthcheck from the plugin
+checkout with `py -3 scripts/repair_starter_healthcheck.py --project PATH_TO_STARTER`.
+The script keeps a byte-for-byte backup and preserves other settings/line endings;
+unknown/custom checks are refused. Reapply compose.yaml with `docker compose up`
+from that starter project; changing the plugin alone does not change an existing
+container's health configuration. No volume-deletion command is needed.
+
+New wizard projects inherit the project SDK, register Java/SQLJ/resource roots,
+enable the shared Java view in ProductRepository.sqlj and retain the SQLJ source
+root in Maven's build-helper configuration. After project opening and the root-model
+write, the optional Maven service registers pom.xml via the bundled SDK API. Check
+that the Maven tool window contains the generated pom and dependencies are imported.
+A disabled Maven plugin produces an explicit instruction to enable it and attach
+pom.xml manually. Core SQLJ support continues to load without Maven.
+
+Navigation acceptance: Ctrl+B on ProductRepository in ProductController must open
+the SQLJ class name before translation and after generated Java appears under
+`target/generated-sources/sqlj`. Generated-class redirection matches qualified
+names inside the same content root, never translated text offsets. Duplicate
+SQLJ declarations are refused. This slice handles generated **class** targets;
+member redirection from generated Java and arbitrary output directories remain
+separate work. Ordinary Java navigation is unchanged.
+
+Reference: [IBM CLP options](https://www.ibm.com/docs/en/db2/11.5.x?topic=clp-options).
+
+## DB2 compressed SMAP output ranges
+
+The container translator emitted `21,6:21,66`: six SQLJ input lines starting at
+21, each covering 66 output coordinates. The earlier helper rejected the whole
+range against physical generated-Java EOF. That was too strict: unused tail
+coordinates do not create executable bytecode locations. Installation now preserves
+such ranges unchanged, while retaining input-source bounds, positive fields and
+signed-int overflow checks for JDI. It does not clamp or guess source positions.
+
+Regression tests include the exact reported rule, rejected overflow/zero increment,
+and a real child JVM with a 66-line output block extending beyond an eight-line
+Java fixture. The SQLJ breakpoint still hits Java line 5 and local value 21 is
+available. Existing per-location source/line/fingerprint checks remain in effect.
+To update an existing generated project, copy the corrected template from
+`src/main/resources/wizard/SqljDebugInfo.java.template` to that project's
+`tools/SqljDebugInfo.java`, then run Maven through process-classes or package.
+
+## Installed IDE: registering SQLJ breakpoint requests
+
+A custom XDebugger breakpoint type does not inherit the Java handler merely by
+extending JavaLineBreakpointType. The reference SDK dispatches handlers by exact
+breakpoint type. SQLJ now registers a JavaBreakpointHandlerFactory for its exact
+type, retaining the Java debugger's native request/enabled/disabled lifecycle.
+The SQLJ type takes priority over Java for a shared Java view, uses all-position
+line properties and suppresses Java-only lambda/inline-return variants. Mapped
+locations are accepted only for the same original file and line; the Java PSI-only
+method-position check is not applied to SQLJ base PSI.
+
+Platform regression tests check extension discovery, the exact dispatch key, type
+priority, actual XDebugger breakpoint storage, native Java LineBreakpoint creation,
+original SQLJ source position and same/different-file/line acceptance. They do not
+replace an installed-plugin JVM session. The standalone JVM mapping tests remain
+a separate layer and never proved this IDE registration path.
+
+Installed-plugin acceptance:
+
+1. Build/install the plugin, restart the IDE and start a new debug session.
+2. Recreate the test breakpoint in SQLJ so it uses the SQLJ type and line properties.
+3. Select the wizard's **SQLJ Demo (Maven + SMAP)** configuration. Older starters
+   can add it using `scripts/install_starter_debug_configuration.py`. The general
+   plugin task **SQLJ: Prepare Debug Build** runs Maven before launch, including
+   compilation and SMAP installation. A Java-only Build must not run afterward.
+4. Debug SqljDemoApplication using that configuration. Pick an
+   executed Java statement in the SQLJ constructor or repository method first;
+   trigger the repository query by opening the product page for a query breakpoint.
+5. Check that the breakpoint becomes verified and execution stops at the original
+   SQLJ line. Test both a breakpoint installed before class loading and one added
+   after the class is loaded. Also test disable/enable, conditions, stopping and
+   restarting the session; evaluation/stepping acceptance is still pending.
+
+If it does not bind, capture the breakpoint's displayed type/status, the actual
+run configuration and the loaded class's SQLJ strata/fingerprint. Local source
+maps alone do not establish which class bytes the IDE launched.
+
+### DB2 maps with overlapping expanded blocks
+
+The starter build helper recognizes the DB2 block pattern observed in the container
+translator output: for example, `21,6:21,66` followed by `28,13:87,1`.
+A JVM expands the first rule through output line 416, hiding the following explicit
+rules. The helper embeds `21:21,66` for that block instead, so the following rule
+can map Java line 89 to SQLJ line 30. The original `.java.smap` sidecar is retained.
+Only this recognizable trailing overlap is normalized; other overlapping patterns
+fail the build before class files are modified. Non-overlapping JSR-45 rules remain
+unchanged. A real-JVM regression exercises the complete reported DB2 map.
+
+Expanded SQL blocks map to their first source line. SQL continuation lines and
+iterator declaration lines do not thereby acquire separate executable locations.
+Set a breakpoint on the opening `#sql` line or on an executable Java statement.
+Existing starter projects need the updated `tools/SqljDebugInfo.java` and a clean
+Maven package build before starting a new debug session.
+
+### Reusable before-launch build preparation
+
+`SqljDebugBuildTaskProvider` registers **SQLJ: Prepare Debug Build** for existing
+run configurations. Per-configuration state stores a POM path and Maven goals;
+the optional Maven bridge delegates to the bundled Maven before-run provider.
+That provider saves documents, uses Maven runner settings, waits for completion,
+and returns failure to IntelliJ instead of launching an application after failure.
+No Maven implementation classes are referenced by the core task/provider.
+Other toolchains need future adapters; a project still supplies its own translation
+and metadata-installation build steps. This is general launch orchestration, not
+a universal translator or automatic retrofit of customer build files.
+
+The wizard writes `.run/SQLJ-Demo.run.xml`, using an Application configuration so
+both Community and Ultimate can launch the main class. It sets project working
+directory, module and main class, enables SQLJ preparation with `clean process-classes`,
+and explicitly disables ordinary Make. The installation script reuses the same
+MIT template for older starters. It never changes other existing configurations.
+
+Manual acceptance: launch without a separate terminal build; stop at executable
+Java and opening SQLJ lines; stop, edit/save source, relaunch and verify the new
+code is executed with fresh mappings. Introduce a compilation error and verify
+that no new application is launched. Also check missing Maven import, renamed
+modules and a wrongly ordered Build task. SDK tests cover provider registration,
+state roundtrip, ordering rules and wizard output. Python tests cover installation,
+XML escaping, idempotence and preservation of existing/custom configurations.
+
+
+### Mapped stepping and suspended-frame locals
+
+The former extra stepping filter always applied and returned STEP_INTO, while its
+runtime-location predicate was never consulted. The implementation now inspects
+the suspended frame and returns STEP_OUT only for exact SQLJ/DB2 runtime package
+prefixes. Null/disconnected/unavailable frames do not override stepping. User,
+Spring and Liberty frames are left to the native debugger and user settings;
+synthetic user methods are no longer indiscriminately filtered by this plugin.
+
+`SqljSteppingPolicy` has no IntelliJ dependencies. The IDE filter and a new real-JVM
+regression share it. `SqljDebugSteppingJdiTest` installs SMAP using the real starter
+helper, starts suspended, consumes VMStartEvent once and uses one-shot JDI step
+requests. It checks Step Over across multiple generated Java lines mapped to one
+SQLJ statement, Step Into/Out between SQLJ methods, stepping out of a controlled
+runtime fixture, parameter/local values and the caller's source position/locals.
+The JVM retains Java as its default stratum, and SQLJ coordinates are queried
+explicitly. New steps reacquire frames after suspension; stale frames are not reused.
+
+This is a JDI regression, not an IntelliJ stepping-command test or IBM-runtime test.
+Use [the installed-plugin procedure](../../examples/debugging/README.md) to record
+F8/F7/Shift+F8 results, selected-frame variable display and unexpected generated
+stops. Watches/evaluation still require the next dedicated implementation and
+acceptance slice; reading JDI locals is not equivalent to expression evaluation.

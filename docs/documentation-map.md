@@ -17,6 +17,8 @@ The main entry point for the SQLJ language project, features, quick start exampl
 - **[SQLJ Language Reference](user-guide/language-reference.md)**: Syntax, clauses (`#sql`, `iterator`, `context`), bind expressions (`:var`, `:OUT`, `:INOUT`), and type mappings.
 - **[IDE Features & Code Insight](user-guide/ide-features.md)**: Syntax highlighting, DB2 SQL injection, code completion, navigation, and debugging.
 
+- **[Debugging Java, Spring & WebSphere Liberty](user-guide/debugging-project-types.md)**: Framework-independent prerequisites, Maven lifecycle, WAR/JAR deployment, remote attach and current acceptance status.
+
 ### 3. Tutorials
 - **[Tutorials Overview](tutorials/index.md)**: Step-by-step learning paths.
 - **[Your First SQLJ Program](tutorials/first-sqlj-program.md)**: Create, write, and execute your first `.sqlj` application.

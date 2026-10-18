@@ -24,7 +24,12 @@ Welcome to the SQLJ User Guide. This guide covers how to set up, write, and exec
    - Dual-language syntax highlighting and color settings
    - Embedded DB2 SQL code completion (tables, columns, dialect syntax)
    - Host variable reference navigation (`Ctrl+B`)
-   - Source-level debugging with line breakpoints and expression evaluation
+   - Source-level breakpoints; stepping and expression evaluation remain under verification
+
+4. **[Debugging Java, Spring & WebSphere Liberty](debugging-project-types.md)**
+
+   IDE and Maven setup for main-class applications and application servers,
+   source-map preservation, packaging/deployment, remote attach and acceptance status.
 
 ---
 

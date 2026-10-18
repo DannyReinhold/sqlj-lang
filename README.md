@@ -3,9 +3,20 @@
 
 Documentation for the independent SQLJ IntelliJ IDEA plugin by Danny Reinhold.
 
+
+> [!WARNING]
+> **FIRST DB2 START: ALLOW MANY MINUTES — PLEASE DO NOT ABORT EARLY.**
+> Downloading the image and creating SAMPLE can take a very long time. The starter
+> allows **15 minutes for readiness after container startup**, plus image download
+> and build time. **The complete first launch can exceed 15 minutes.** A running
+> container is not yet a ready database. Keep the build running and use
+> `docker compose logs --follow db2` in a second terminal to see initialization.
+> Later starts normally reuse the database and become ready much sooner.
+
 - [Website and overview](https://sqlj-lang.org)
 - [Documentation index](docs/documentation-map.md)
 - [Getting started](docs/user-guide/getting-started.md)
+- [Debugging Java, Spring and WebSphere Liberty](docs/user-guide/debugging-project-types.md)
 - [Licensing](docs/licensing.md)
 - [Contributor information](CONTRIBUTING.md)
 

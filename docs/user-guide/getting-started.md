@@ -30,27 +30,52 @@ Alternatively, for offline or SNAPSHOT installations:
 
 ## 2. Creating a Project via the "New Project" Wizard
 
-The plugin provides a dedicated **New Project Wizard** to instantly spin up a complete Spring Boot + Thymeleaf demo application with a local DB2 Docker container and sample `.sqlj` files:
+The plugin provides a dedicated **New Project Wizard** to generate a complete Spring Boot + Thymeleaf demo application with a local DB2 Docker container and sample `.sqlj` files:
 
 1. Click **File** -> **New** -> **Project...** (or select **New Project** on the Welcome Screen).
 2. Select **SQLJ Spring Boot Application** under the **SQLJ** group.
 3. Configure your Maven coordinates (`GroupId`, `ArtifactId`, `Version`, and base package name).
-4. Click **Create**.
+4. Click **Create**. The wizard attaches `pom.xml` to IntelliJ Maven after the project opens.
+   Wait for dependency import; the Maven tool window should contain your project.
+   If the bundled Maven plugin is disabled, enable it and choose **Add as Maven Project** on `pom.xml`.
 
 IntelliJ IDEA generates:
 - A modern Spring Boot 3.4 application with Thymeleaf and Spring JDBC.
 - Full Maven build integration with dual-strategy SQLJ translation (local `sqlj-local` profile when `com.ibm.db2:sqlj` exists in `~/.m2`, or automated `sqlj-container` profile that starts the container, extracts `sqlj4.zip`, and translates SQLJ sources).
 - Automatic Docker Compose integration via `spring-boot-docker-compose`, launching local IBM DB2 from `compose.yaml` automatically on application startup.
 - Automatic database migrations and data seeding via **Flyway** (`src/main/resources/db/migration/V1__init_schema.sql` and `V2__sample_data.sql`).
+- Java and SQLJ source roots, including a shared Java view in the generated SQLJ repository.
 - A working `ProductRepository.sqlj` using typed SQLJ iterators, `DefaultContext`, and host variables (`:targetCategory`, `:newStock`).
 - A Thymeleaf UI with a product catalog and interactive stock updates.
+
+> [!WARNING]
+> **FIRST DB2 START: ALLOW MANY MINUTES — PLEASE DO NOT ABORT EARLY.**
+> Downloading the image and creating SAMPLE can take a very long time. The starter
+> allows **15 minutes for readiness after container startup**, plus image download
+> and build time. **The complete first launch can exceed 15 minutes.** A running
+> container is not yet a ready database. Keep the build running and use
+> `docker compose logs --follow db2` in a second terminal to see initialization.
+> Later starts normally reuse the database and become ready much sooner.
 
 To run the generated project:
 ```bash
 # Start the Spring Boot application (DB2 container starts automatically via Docker Compose integration!)
 mvn spring-boot:run
 ```
-Then open [http://localhost:8080](http://localhost:8080) in your browser.
+Wait until `[SQLJ] Application ready` appears, then open [http://localhost:8080](http://localhost:8080).
+During the initial Maven container wait, the application heartbeat has not started yet;
+use the second terminal's DB2 logs. Java startup reports elapsed time every 15 seconds.
+On failure inspect `docker compose ps` and `docker compose logs --tail 100 db2`.
+
+Ctrl+B on `ProductRepository` in `ProductController` navigates to the original SQLJ
+class, including when Maven has generated its Java counterpart in the standard
+`target/generated-sources/sqlj` directory.
+
+For experimental SQLJ debug metadata, the generated Maven build installs the translator's
+SMAP into compiled classes during `process-classes`. Use `mvn clean package` before an
+IDE debug run; a Java-only IDE rebuild can overwrite that metadata. Unsaved SQLJ edits
+invalidate the embedded fingerprint and require a Maven rebuild. Automatic IDE build
+integration, stepping and evaluation still need validation.
 
 ---
 

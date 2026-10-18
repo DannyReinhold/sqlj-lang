@@ -37,7 +37,7 @@ successfully is not evidence of semantic completion or successful translation.
 | Contexts | Default/named connection and execution contexts | Dedicated scenario pending |
 | DB2 SQL | Joins, aliases, CTEs, functions, schema and platform variants | Data-source/dialect verification pending |
 | Java interoperability | Handwritten Java calling SQLJ classes before/after build | Packaged IDE scenario pending |
-| Debugging | Java/query breakpoints, stepping, locals, watches, remote attach | Live JDI scenario pending |
+| Debugging | Java/query breakpoints, stepping, locals, watches, remote attach | Wizard breakpoints/build preparation confirmed; [stepping/frame procedure](debugging/README.md) and controlled real-JVM regression added; IDE stepping/evaluation and Liberty acceptance pending |
 | Artifact variants | Container translator and externally built customer artifacts | Capture source/class/debug-metadata pairs |
 
 Do not invent customer-specific syntax to fill this matrix. Add small independent
@@ -49,3 +49,10 @@ example that obscures individual failures.
 
 See [the opt-in Java view probe](java-view/README.md) for native Java completion
 and shared-document checks. The existing fixtures keep the legacy view.
+
+## Debugger acceptance
+
+Use [SQLJ stepping, stack frames and local variables](debugging/README.md) for
+installed-plugin checks in a generated project. It separates source breakpoint
+hits, stepping, selected-frame locals and expression evaluation instead of
+claiming all four from one successful debug stop.
