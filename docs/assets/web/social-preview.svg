@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630"><title>SQLJ Language Support — independent plugin</title><rect width="1200" height="630" fill="#111528"/><g transform="translate(60 80) scale(1.4)"><g fill="none" stroke-width="17" stroke-linecap="round" stroke-linejoin="round">
+    <path stroke="#9366FF" d="M127 38 H54 Q29 38 29 63 V117 Q29 142 54 142 H104 Q117 142 125 133"/>
+    <path stroke="#FF887E" d="M128 47 Q139 38 152 38 H202 Q227 38 227 63 V117 Q227 142 202 142 H152 Q141 142 133 134 L105 106 Q89 90 105 74"/>
+    <path stroke="#9366FF" d="M116 38 L145 68 Q163 86 146 105 L136 115"/>
+    </g><g fill="none" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"><path stroke="#9366FF" d="M59 75 H88 M59 91 H88 M59 107 H88"/><path stroke="#FF887E" d="M178 77 L166 90 L178 103 M196 77 L208 90 L196 103"/></g></g><g font-family="DejaVu Sans,sans-serif" fill="#F4F2FF"><text x="65" y="420" font-size="64" font-weight="bold">SQLJ Language Support</text><text x="68" y="475" font-size="28" fill="#C4BCD7">Independent IntelliJ IDEA plugin</text><text x="68" y="560" font-size="25" fill="#AF8BFF">sql-lang.org</text></g></svg>
