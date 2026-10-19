@@ -68,7 +68,7 @@ plugin does not connect to a database or discover production schemas.
 Java binds and their indicators are replaced by SQL parameter placeholders for
 injection. This does not implement every DB2 SQLJ-specific SQL construct, guarantee
 SQL formatting behavior or validate query/result types against the catalog.
-SQL dialect assistance does not establish z/OS, IBM i or Oracle runtime support.
+SQL dialect assistance does not configure your translator, binding or deployment pipeline.
 Customize SQLJ colors under **Settings → Editor → Color Scheme → SQLJ**.
 
 ## Toolchain settings: what they currently do

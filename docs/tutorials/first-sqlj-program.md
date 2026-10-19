@@ -9,19 +9,19 @@ or separate example download is required.
 
 ## Follow one request through the code
 
-1. Open `ProductController.java` under `src/main/java` and find its repository use.
-   Ctrl+B on `ProductRepository` should open `ProductRepository.sqlj` under
+1. Open `TodoController.java` under `src/main/java` and find its repository use.
+   Ctrl+B on `TodoRepository` should open `TodoRepository.sqlj` under
    `src/main/sqlj`, rather than requiring you to edit generated Java.
 2. In the SQLJ repository, inspect the named iterator declaration. Its columns
    become modeled Java accessor methods for completion and navigation.
 3. Follow `findAll()`: the repository obtains a JDBC connection from the configured
    DataSource, wraps it in a SQLJ context, executes a query into an iterator,
-   traverses rows and creates Product objects. The generated code shows its cleanup.
-4. Find a host bind such as `:targetCategory` or `:newStock`. Ctrl+B should navigate
+   traverses rows and creates Todo objects. The generated code shows its cleanup.
+4. Find a host bind such as `:title` or `:taskId`. Ctrl+B should navigate
    to its Java declaration. In a disposable copy, try an invalid member name and
    confirm highlighting, then undo the change.
 5. Run the application and open [http://localhost:8080](http://localhost:8080).
-   Browse the products and exercise a stock update. Flyway supplied the schema
+   Add a task, mark it complete, reopen it, try a filter and delete a task. Flyway supplied the schema
    and seed records; SQLJ did not create them merely by opening the file.
 
 ## Understand the build boundary

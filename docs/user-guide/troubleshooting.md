@@ -6,6 +6,22 @@ Check the [capability matrix](compatibility.md) for server/toolchain requirement
 and supported integrations. You do not need private source
 access to investigate or report an installed-plugin problem.
 
+## License and distribution
+
+Use **Tools → SQLJ: License Information**. Marketplace packages require a valid
+product license or trial; an IDE subscription alone does not license this plugin.
+If status is INITIALIZING, allow IDE licensing to finish and refresh the dialog.
+UNLICENSED means no valid product confirmation is available. Check the account,
+license/trial entitlement and approved IDE licensing connection. A covered fallback
+release may differ from the newest installed release. CONFIGURATION_ERROR calls
+for reinstalling the approved package and reporting its version/hash.
+
+A customer distribution shows its customer reference and uses the written grant,
+not Marketplace checks. Do not share license stamps/activation keys in support
+reports. Opening files and existing run configurations must not delete or change
+source because a license is unavailable; activate and reopen the project if its
+Java view was created before licensing was ready.
+
 ## Editor and project import
 
 | Symptom | Check |

@@ -1,48 +1,43 @@
 <!-- SPDX-License-Identifier: CC-BY-4.0; code examples: MIT -->
+
 # Licensing
 
-Copyright 2026 Danny Reinhold. This independent SQLJ plugin is not an official
-IBM or JetBrains product. Their names and marks remain their owners' property.
+SQLJ Language Support is commercial software by Danny Reinhold under the
+[SQLJ Plugin EULA](eula.md). There is no parallel free noncommercial license for
+the current Plugin. The source repository is private.
 
-## Plugin
+## Marketplace subscriptions
 
-The plugin implementation, tests, project-owned resources and standalone source
-examples are governed by the unmodified
-[PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0).
-It permits noncommercial purposes and the organization categories expressly
-listed in that license, including educational and government institutions.
-There is no separate freelancer exemption and no automatic future Apache change.
+The complete feature set is available with personal and business subscription
+offers, normally including a 30-day trial. A personally purchased license permits
+commercial/freelance work by its assigned owner; personal purchase is not free
+use and does not create transferable organization seats.
 
-Use outside the permitted purposes needs a separate commercial license from
-Danny Reinhold. Contact [support@sqlj-lang.org](mailto:support@sqlj-lang.org),
-or use the applicable commercial offer on the JetBrains Marketplace when listed.
-Source access, installation and building are not themselves a commercial license.
+The offer and purchase confirmation determine users, duration, renewal and
+fallback entitlement. With eligible perpetual fallback, a covered older release
+can remain usable after subscription expiry; this does not automatically cover
+the latest installed version. Consult the [EULA](eula.md) and actual offer.
+Contact [support@sqlj-lang.org](mailto:support@sqlj-lang.org) for availability.
 
-## Documentation and examples
+## Selected-customer packages
 
-The documentation, its Markdown files and project-owned website artwork are
-licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
-You may use them commercially under its attribution and other conditions.
-Attribute Danny Reinhold, link to the license and indicate your changes.
+The Developer can supply a package without Marketplace activation checks under
+a separate written customer grant. Its commercial terms still apply; absence of
+a technical check does not grant unlimited use or redistribution. These packages
+are supplied privately and are not Marketplace releases. **Tools → SQLJ: License
+Information** identifies the installed distribution and its customer reference.
 
-Code examples embedded in this documentation and starter project files generated
-by the project wizard are additionally available under the
-[MIT License](https://opensource.org/license/mit). Their license is separate from
-the plugin's implementation and from standalone .java/.sqlj test/example fixtures.
-Keep the MIT copyright and permission notice when reusing substantial portions.
+## Documentation, starter and third parties
 
-Third-party snippets, dependencies and tools retain their own notices and licenses.
-These grants do not license third-party marks, IBM runtimes or downloaded toolchains.
-The applicable license texts/notices accompany source and plugin distributions;
-the public documentation repository carries CC BY and MIT texts.
+Documentation and project-owned website artwork are
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/): attribute Danny Reinhold,
+link the license and indicate changes. Embedded documentation code examples and
+wizard-generated starter files are also [MIT](https://opensource.org/license/mit)
+and can be used commercially under those terms. This does not license the plugin
+implementation or standalone implementation/test fixtures under MIT.
 
-## Source access and repository separation
-
-The plugin source repository is private. License terms do not promise public
-source availability or grant repository credentials. Obtain the installed package
-through the maintainer/approved distributor, or the applicable Marketplace offer
-when available. No public Marketplace release is implied by this pre-release guide.
-
-Gitea is the private development repository. GitHub is a generated documentation
-repository and contains no plugin source or binary distribution. Previously issued
-Apache-2.0 rights for older copies are not revoked by the repository/license change.
+Vendor tools, drivers, containers and other dependencies retain their own terms.
+This independent plugin is not an official IBM or JetBrains product and grants no
+third-party trademark rights. Earlier Apache-2.0/PolyForm copies keep their prior
+grants; those licenses do not apply as alternatives to this current distribution.
+GitHub publishes documentation only, not plugin source or binary distributions.

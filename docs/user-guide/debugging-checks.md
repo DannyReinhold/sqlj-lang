@@ -10,9 +10,9 @@ follow [the Java/Spring/Liberty setup](debugging-project-types.md).
 
 ## 1. Step Over and initialization
 
-Set a SQLJ breakpoint on the `List<Product> result = new ArrayList<Product>();`
-statement in `ProductRepository.findAll()`. Debug the application and open the
-product page so the method is executed. Select the repository frame under
+Set a SQLJ breakpoint on the `List<Todo> result = new ArrayList<Todo>();`
+statement in `TodoRepository.findAll()`. Debug the application and open the
+task page so the method is executed. Select the repository frame under
 **Threads & Variables** in the Debug window (`Alt+5`).
 
 Before the declaration executes, `this` should be available but `result` can be
@@ -36,7 +36,7 @@ settings may separately skip JDK methods, constructors or synthetic methods.
 ## 2. A controlled user-method call inside the SQLJ file
 
 In a disposable copy of the example, add this helper **inside** the existing
-`ProductRepository` class:
+`TodoRepository` class:
 
 ```java
 private static int debugRowCount(int count) {
@@ -52,7 +52,7 @@ Immediately before `return result;` in `findAll()`, add:
 int inspectedCount = debugRowCount(result.size());
 ```
 
-The existing SQLJ input remains `ProductRepository.sqlj`, so the wizard's translator
+The existing SQLJ input remains `TodoRepository.sqlj`, so the wizard's translator
 execution includes the change. Do not merely add a second `.sqlj` input and assume
 the wizard's baseline translation command automatically discovers it.
 
@@ -123,7 +123,7 @@ log expressions use the same preparation hooks but need their own live check.
 
 ## 5. Conditional breakpoints with deterministic hits
 
-For this check, use a disposable copy of `ProductRepository.sqlj`. Add the following
+For this check, use a disposable copy of `TodoRepository.sqlj`. Add the following
 members inside its class:
 
 ```java
@@ -157,7 +157,7 @@ select it. Enable **Condition** and enter this Java boolean expression:
 value == 1 && threshold == 1 && this.threshold == 99
 ```
 
-Keep **Suspend: All** for this first check. Open the product page exactly once:
+Keep **Suspend: All** for this first check. Open the task page exactly once:
 
 - The invocation with `value == 0` must not suspend there.
 - The invocation with `value == 1` should suspend there. Inspect `value`, the local
@@ -177,7 +177,7 @@ check **Evaluate and log**. Enter a Java expression that returns the text to pri
 "SQLJ probe value=" + value + ", local=" + threshold + ", field=" + this.threshold
 ```
 
-Open the product page once. The application should complete the request without
+Open the task page once. The application should complete the request without
 an interactive stop, while the debugger Console contains three messages for
 values `0`, `1`, `2`, each with `local=1` and `field=99`. Distinguish these messages
 from the optional **Breakpoint hit message** and normal application logs.

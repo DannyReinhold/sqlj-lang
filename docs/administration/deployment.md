@@ -24,8 +24,9 @@ features can require a separate JetBrains entitlement.
 Review [licensing](../licensing.md) before rollout. The documentation's CC BY license
 and the generated starter's MIT license do not license the plugin for commercial
 use. Obtain appropriate commercial terms from the maintainer when required; do
-not infer entitlement from the ability to install or copy a ZIP. No central
-license-server integration or automatic commercial-license enforcement is promised.
+not infer entitlement from the ability to install or copy a ZIP. Marketplace packages use native IDE license/trial activation and signature checks.
+Use your organization's approved JetBrains licensing setup. Selected-customer
+packages instead use a written grant and do not perform Marketplace activation.
 
 ## 2. Obtain and distribute the artifact
 
@@ -43,7 +44,11 @@ Get-FileHash -Algorithm SHA256 .\sqlj-lang-<version>.zip
 ```
 
 Replace `<version>` with the actual delivered version. Keep the approved archive,
-its hash and release notes for rollback. For a pilot, install through **Settings →
+its hash and release notes for rollback. Use Tools → SQLJ: License Information
+to confirm whether the package is Marketplace or an identified customer build.
+Use only one distribution at a time: they have the same plugin ID. For privately
+managed customer packages, control/disable automatic plugin updates so a public
+Marketplace update does not replace the customer variant. For a pilot, install through **Settings →
 Plugins → gear menu → Install Plugin from Disk**, then restart as requested.
 Confirm the installed plugin's name/version and enabled Java dependency.
 

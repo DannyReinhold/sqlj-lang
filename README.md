@@ -25,6 +25,6 @@ The publisher replaces these files; send fixes through [support](docs/user-guide
 
 Documentation and project-owned artwork: Copyright 2026 Danny Reinhold,
 [CC BY 4.0](LICENSE). Embedded code examples: [MIT](LICENSE-CODE-EXAMPLES).
-The plugin has separate PolyForm Noncommercial/commercial terms. Documentation
+The plugin has separate commercial EULA terms. Documentation
 licensing grants no commercial entitlement to the plugin. Third-party rights and
 trademarks remain with their respective owners.

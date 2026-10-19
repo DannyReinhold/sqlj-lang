@@ -7,11 +7,14 @@ It does not require access to the private plugin source repository.
 
 ## Administration and evaluation
 
+- [Existing build integration](user-guide/build-tool-integration.md): obtain the build tool,
+  Maven fragments, CI and deployment order without generating a demo.
 - [Administration and deployment](administration/deployment.md): prerequisites,
   approved distribution, licensing review, rollout, updates, rollback and data handling.
 - [Capabilities and compatibility](user-guide/compatibility.md): implemented behavior,
   verified baseline and explicit limits.
 - [Licensing](licensing.md): plugin, documentation, starter and third-party rights.
+- [Commercial Plugin EULA](eula.md): subscription, trial, fallback and customer grants.
 
 ## Development with the plugin
 

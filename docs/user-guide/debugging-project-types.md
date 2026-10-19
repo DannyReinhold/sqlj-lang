@@ -11,6 +11,10 @@ and a Spring application deployed to WebSphere Liberty (WLP): translation,
 compilation and debug metadata must correspond to the source open in the IDE.
 The server must actually execute those classes.
 
+For existing enterprise builds, follow the [standalone build-tool integration guide](build-tool-integration.md).
+It covers obtaining the tool without the wizard, Maven fragments, JDK selection,
+module-specific paths and the CI/package/deploy boundary.
+
 ## Launch options
 
 | Application | Setup |
@@ -35,7 +39,7 @@ The required order is:
 5. Launch or attach the Java debugger and execute the relevant application path.
 
 The wizard performs steps 1–3 with its generated Maven executions and
-`tools/SqljDebugInfo.java`. **Adding SQLJ: Prepare Debug Build to a customer project
+the plugin-supplied `.mvn/sqlj/sqlj-debug-tool.jar`. **Adding SQLJ: Prepare Debug Build to a customer project
 does not add these executions or replace its translator/binding process.**
 Configure the customer's debug build to produce equivalent metadata first.
 Binding and deployment settings remain part of that project's toolchain.
@@ -259,11 +263,11 @@ extracting it to a temporary inspection directory. For a local Maven output,
 replace the illustrative class path below with the affected class:
 
 ```powershell
-javap -v .\target\classes\com\example\repository\ProductRepository.class |
+javap -v .\target\classes\com\example\repository\TodoRepository.class |
     Select-String -Pattern "^SourceDebugExtension:" -Context 0,150
 ```
 
-`SourceFile: ProductRepository.java` is expected for generated Java and does not
+`SourceFile: TodoRepository.java` is expected for generated Java and does not
 mean that SQLJ debug information is missing. Inspect the complete SMAP, rather
 than matching every occurrence of `sqlj` in the constant pool.
 

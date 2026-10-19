@@ -11,7 +11,10 @@ Read the [compatibility matrix](compatibility.md) before evaluating a new enviro
 
 Obtain the plugin ZIP from the maintainer/your administrator. In IntelliJ open
 **Settings → Plugins → gear menu → Install Plugin from Disk**, select the ZIP and
-restart when requested. Confirm **SQLJ Language Support** is enabled under Installed.
+restart when requested. Confirm **SQLJ Language Support** is enabled under Installed. For a Marketplace
+package, activate its subscription/trial in the IDE's license management.
+Tools → SQLJ: License Information shows status and opens activation. A privately
+supplied customer package uses its separate written grant instead.
 Once a Marketplace version is published, the listing offers an alternative;
 this pre-release guide does not imply that it is already available.
 
@@ -100,12 +103,12 @@ it selects `sqlj-container` and extracts tools from the DB2 image into `target`.
 also assumes its configured JDBC jar path; using it requires those local artifacts.
 Use `mvn help:active-profiles` to inspect the selection. Do not confuse these Maven
 profiles with the plugin's separate Toolchain settings; those settings do not
-rewrite the generated POM. The container profile is the first tested baseline.
+rewrite the generated POM. The container profile is the default fallback.
 
 ## 5. Try navigation and debugging
 
-Open `ProductRepository.sqlj`. Ctrl+B on a host variable navigates to its Java
-declaration; Ctrl+B on `ProductRepository` in `ProductController.java` should
+Open `TodoRepository.sqlj`. Ctrl+B on a host variable navigates to its Java
+declaration; Ctrl+B on `TodoRepository` in `TodoController.java` should
 navigate back to SQLJ, including after Maven generates Java in its standard output.
 Completion and highlighting depend on completed Maven import and the shared Java view.
 
@@ -116,7 +119,7 @@ source maps afterward. Other run configurations are unchanged. If the Maven
 module was renamed, select its actual module in Edit Configurations.
 
 Set a breakpoint on an executable Java statement in the SQLJ repository or the
-opening `#sql` line, then open the product page. `mvn compile` alone stops too early
+opening `#sql` line, then open the task page. `mvn compile` alone stops too early
 to install SMAP. Use the [debugging guide](debugging-project-types.md) for source-map
 setup, stepping, expression evaluation and diagnostics.
 
@@ -124,6 +127,26 @@ setup, stepping, expression evaluation and diagnostics.
 
 Follow [existing-project editor setup](ide-features.md). Keep your approved
 translator/runtime/binding pipeline. The demo POM currently translates its one
-`ProductRepository.sqlj` input; adding files does not automatically add translation
+`TodoRepository.sqlj` input; adding files does not automatically add translation
 executions. The plugin does not supply a complete generic Maven/Gradle/Ant build.
 For a runnable orientation, continue with the [wizard walkthrough](../tutorials/first-sqlj-program.md).
+
+## The Small Steps demo
+
+The wizard creates a ToDo list with local styling and five starter tasks. Add a task
+with an optional note, mark it done or reopen it, delete it, and switch between All,
+To do and Done. SQLJ Plugin and Vernac tasks include links to their websites.
+The SQLJ repository reads and writes DB2; tasks remain in the named `db2-data`
+Compose volume across restarts and container recreation. The ToDo demo uses its own
+`sqlj_todo_schema_history` migration table, separate from earlier catalog demos.
+The fixed container name and port mean only one demo can run at a time.
+
+Generate the new demo in a fresh project directory. Existing product-catalog demos
+keep their original schema and Flyway history; the wizard does not upgrade those projects.
+The demo is intended for local development and has no login or user separation.
+
+The plugin supplies a small MIT-licensed build tool at `.mvn/sqlj/sqlj-debug-tool.jar`.
+It embeds SQLJ debug metadata during Maven's build, without adding a helper Java class
+to your project or a runtime dependency to your application. Commit this build tool
+with the project to retain standalone Maven builds. Its version is fixed when the
+project is generated; a plugin update does not replace files in existing projects.

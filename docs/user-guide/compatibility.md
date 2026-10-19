@@ -15,7 +15,6 @@ organization's software distribution policy and the delivered release notes.
 | Demo build | JDK 21, Maven, Docker and Compose v2 with `up --wait --wait-timeout`; network access for initial dependencies/image download. |
 | SQL assistance | DB2 language injection when available, otherwise SQL/GenericSQL fallback. Rich schema assistance requires optional Database Tools/SQL support, its entitlement and a configured data source. |
 | DB2 baseline | Generated wizard project, DB2 LUW container image `icr.io/db2_community/db2:11.5.9.0`. |
-| z/OS and IBM i | No dedicated server/toolchain integration. Use the application's vendor-specific translation, binding and deployment pipeline; the wizard targets LUW. |
 | Oracle SQLJ and Derby | Not currently supported. |
 | Build systems | Generated Maven starter and Maven before-launch preparation. Existing builds need their own translation/runtime setup. No automatic Gradle/Ant debug-build adapter. |
 

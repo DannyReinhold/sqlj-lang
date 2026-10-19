@@ -16,5 +16,5 @@ source, credentials or production data. Remain respectful in public discussions.
 Source contributions require separately authorized access and agreement with the
 maintainer. Do not assume public source access or commercial relicensing rights.
 Documentation is CC BY 4.0; embedded examples and wizard output are MIT; plugin
-code has separate PolyForm Noncommercial/commercial terms. See
+code has separate commercial EULA terms. See
 [licensing](docs/licensing.md) for scope and third-party rights.
