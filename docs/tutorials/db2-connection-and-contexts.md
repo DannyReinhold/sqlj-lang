@@ -1,132 +1,74 @@
 <!-- SPDX-License-Identifier: CC-BY-4.0; code examples: MIT -->
 
-# Tutorial: DB2 Connections & Execution Contexts
+# Connection and execution contexts
 
-In enterprise systems, applications frequently coordinate operations across multiple data sources or require explicit transaction boundaries. This tutorial explains how to manage connections with **Connection Contexts**.
+These fragments assume a configured DB2 SQLJ application, runtime dependencies
+and an existing JDBC connection. Start with the [wizard walkthrough](first-sqlj-program.md)
+for a runnable baseline. Application transaction management remains outside the plugin.
 
----
+## Wrap an application-owned JDBC connection
 
-## 1. Declaring Context Classes
-
-In SQLJ, connection context types are declared with `#sql context`:
+A connection context associates SQLJ statements with a JDBC connection. For
+example, inside a method that receives a valid `java.sql.Connection connection`
+and handles SQLException:
 
 ```java
-package org.example.banking;
-
-// Context for primary transactions
-#sql public context CoreBankingContext;
-
-// Context for audit logs (often pointing to a separate audit database)
-#sql public context AuditContext;
+#sql public context AppContext;
 ```
 
-When preprocessed, SQLJ generates Java classes (`CoreBankingContext`, `AuditContext`) subclassing `sqlj.runtime.ref.ConnectionContextImpl`.
-
----
-
-## 2. Using Context Qualifiers
-
-You can direct `#sql` clauses to execute on a specific context by prefixing the statement with `[contextInstance]`.
-
-### Example: Multi-Database Transfer and Audit
+Declare the context at a legal top-level/nested declaration location; then use it
+inside the method:
 
 ```java
-package org.example.banking;
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.math.BigDecimal;
-
-public class TransferService {
-
-    public void transferAndAudit(
-        Connection coreConn,
-        Connection auditConn,
-        long fromAccount,
-        long toAccount,
-        BigDecimal amount
-    ) throws SQLException {
-
-        CoreBankingContext coreCtx = new CoreBankingContext(coreConn);
-        AuditContext auditCtx = new AuditContext(auditConn);
-
-        try {
-            // 1. Deduct funds on Core Banking DB
-            #sql [coreCtx] {
-                UPDATE accounts
-                SET balance = balance - :amount
-                WHERE account_id = :fromAccount
-            };
-
-            // 2. Deposit funds on Core Banking DB
-            #sql [coreCtx] {
-                UPDATE accounts
-                SET balance = balance + :amount
-                WHERE account_id = :toAccount
-            };
-
-            // 3. Commit banking transaction
-            coreConn.commit();
-
-            // 4. Record audit entry on Audit DB
-            #sql [auditCtx] {
-                INSERT INTO transfer_audit_log (
-                    from_acct, to_acct, transfer_amt, event_time
-                ) VALUES (
-                    :fromAccount, :toAccount, :amount, CURRENT TIMESTAMP
-                )
-            };
-
-            auditConn.commit();
-
-        } catch (SQLException e) {
-            coreConn.rollback();
-            throw e;
-        } finally {
-            coreCtx.close();
-            auditCtx.close();
-        }
-    }
+AppContext context = new AppContext(connection);
+try {
+    int count = 0;
+    #sql [context] { SELECT COUNT(*) INTO :count FROM employee };
+    System.out.println(count);
+} finally {
+    context.close(sqlj.runtime.ConnectionContext.KEEP_CONNECTION);
 }
 ```
 
----
+`KEEP_CONNECTION` closes context resources while leaving the supplied JDBC
+connection under its owner's control. Follow your actual runtime/pool's ownership
+contract; do not casually close framework-managed connections. Do not set a
+global DefaultContext per web request as a substitute for request/transaction
+scoping. The generated demo provides its own explicit-context example.
 
-## 3. Context Configuration with `with` Clause
+## Supply execution state separately
 
-A DB2 context can name a separately configured JNDI DataSource:
+A `sqlj.runtime.ExecutionContext` controls execution-related state. In a method
+with suitable exception handling and a valid connection context:
+
+```java
+sqlj.runtime.ExecutionContext execution = context.getExecutionContext();
+int count = 0;
+#sql [context, execution] { SELECT COUNT(*) INTO :count FROM employee };
+```
+
+The editor resolves these Java expressions and checks connection/execution roles
+when runtime types are known. It does not create transactions or verify that a
+runtime connection is live. Single-entry qualifiers can refer to either role as
+supported by the IBM translator. See [IBM's context-clause reference](https://www.ibm.com/docs/en/db2/11.1.0?topic=information-sqlj-context-clause).
+
+## JNDI DataSource variant
 
 ```java
 #sql public context ReportingContext with (dataSource = "jdbc/reporting");
-
-// The JNDI resource must already exist in the application environment.
-ReportingContext context = new ReportingContext();
 ```
 
-This form supplies parameterless and user/password constructors in addition to
-wrappers for an existing JDBC Connection or SQLJ ConnectionContext. Contexts
-without dataSource use the URL-based constructor set instead. All these
-constructors declare SQLException.
+This form models a different constructor family, including a parameterless
+constructor for an existing JNDI resource. An application server must provision
+that resource first. The plugin does not create it or configure pooling.
+The wizard container demo does not require JNDI; this is an additional API/editor
+scenario, not an accepted Liberty deployment recipe.
 
-Custom with attributes do not automatically configure JDBC behavior. Set read-only
-or transaction isolation on the actual connection where appropriate, for example:
+## Transactions and multiple databases
 
-```java
-java.sql.Connection connection = context.getConnection();
-connection.setReadOnly(true);
-connection.setTransactionIsolation(java.sql.Connection.TRANSACTION_READ_COMMITTED);
-```
-
-Whether those settings are supported and how they interact with pooling and
-transactions depends on the driver/application. The wizard's standard DB2
-container example does not require JNDI setup; keep that path as the first runnable
-and debuggable baseline. The JNDI variant is an additional editor/API scenario.
-
----
-
-## 4. Best Practices
-
-1. **Always close contexts**: Closing a context releases underlying prepared statement caches.
-2. **Handle transaction boundaries explicitly**: Use `conn.commit()` / `conn.rollback()` or configure autocommit behavior on the connection context.
-3. **Use DefaultContext for simple services**: For single-datasource applications, setting `DefaultContext.setDefaultContext(...)` avoids repeating qualifiers on every statement.
+Keep transaction ownership in your application's existing layer. Calling commit
+on one JDBC connection does not atomically commit a second database. The plugin
+provides neither a transaction manager nor XA coordination. For Spring/Liberty,
+follow the established transaction/pool configuration and release connections
+through the framework's prescribed mechanism. Custom `with` attributes do not
+replace those settings or automatically set JDBC isolation/read-only flags.

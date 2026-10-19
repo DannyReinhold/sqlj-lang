@@ -1,44 +1,43 @@
 <!-- SPDX-License-Identifier: CC-BY-4.0; code examples: MIT -->
 
-# SQLJ Language Documentation Map
+# Documentation map
 
-Welcome to the documentation for **SQLJ Language Support for IntelliJ IDEA** (`sqlj-lang`) and the SQLJ language tooling ecosystem at **[sqlj-lang.org](https://sqlj-lang.org)**.
+This is the public documentation for users of the SQLJ IntelliJ IDEA plugin.
+It does not require access to the private plugin source repository.
 
----
+## Administration and evaluation
 
-## Structure Overview
+- [Administration and deployment](administration/deployment.md): prerequisites,
+  approved distribution, licensing review, rollout, updates, rollback and data handling.
+- [Capabilities and compatibility](user-guide/compatibility.md): implemented behavior,
+  verified baseline and explicit limits.
+- [Licensing](licensing.md): plugin, documentation, starter and third-party rights.
 
-### 1. [Home / Overview](index.md)
-The main entry point for the SQLJ language project, features, quick start examples, and architecture overview.
+## Development with the plugin
 
-### 2. User Documentation & Reference
-- **[User Guide Overview](user-guide/index.md)**: High-level overview of using SQLJ in modern Java environments.
-- **[Getting Started & Installation](user-guide/getting-started.md)**: Installing the IntelliJ plugin, configuring JDK 21+ and DB2 dependencies.
-- **[SQLJ Language Reference](user-guide/language-reference.md)**: Syntax, clauses (`#sql`, `iterator`, `context`), bind expressions (`:var`, `:OUT`, `:INOUT`), and type mappings.
-- **[IDE Features & Code Insight](user-guide/ide-features.md)**: Syntax highlighting, DB2 SQL injection, code completion, navigation, and debugging.
+- [Getting started](user-guide/getting-started.md): install and run the wizard demo.
+- [Editor features and existing projects](user-guide/ide-features.md): source roots,
+  Java view, runtime classpath, navigation, SQL assistance and toolchain boundaries.
+- [SQLJ reference](user-guide/language-reference.md): supported forms and editor checks.
+- [Debugging setup](user-guide/debugging-project-types.md): Maven preparation,
+  source maps, Java/Spring launch, Liberty attach and diagnostics.
+- [Debugging verification](user-guide/debugging-checks.md): reproducible manual checks
+  with expected outcomes; these are acceptance instructions, not claims of completion.
+- [Troubleshooting and support](user-guide/troubleshooting.md): symptoms, diagnostics
+  and a useful, redacted problem report.
 
-- **[Debugging Java, Spring & WebSphere Liberty](user-guide/debugging-project-types.md)**: Framework-independent prerequisites, Maven lifecycle, WAR/JAR deployment, remote attach and current acceptance status.
+## Learning SQLJ
 
-### 3. Tutorials
-- **[Tutorials Overview](tutorials/index.md)**: Step-by-step learning paths.
-- **[Your First SQLJ Program](tutorials/first-sqlj-program.md)**: Create, write, and execute your first `.sqlj` application.
-- **[Working with SQLJ Iterators](tutorials/working-with-iterators.md)**: Named vs. positional iterators, typed cursor traversal, and error handling.
-- **[DB2 Connections & Execution Contexts](tutorials/db2-connection-and-contexts.md)**: Multi-connection architectures, custom execution contexts, and transaction boundaries.
+- [Tutorials](tutorials/index.md)
+- [Wizard project walkthrough](tutorials/first-sqlj-program.md)
+- [Named and positional iterators](tutorials/working-with-iterators.md)
+- [Connection and execution contexts](tutorials/db2-connection-and-contexts.md)
 
-### 4. Developer & Contributor Documentation
-- **[Developer Portal](development/index.md)**: Contributing, architecture, AST & PSI design, and development principles.
-- **[Development Plan](development/development-plan.md)**: Milestone roadmap from Phase 0 to Phase 6.
-- **[Language Semantics & Java Integration](development/language-and-java.md)**: PSI models, multi-host injection, scoping, and lessons learned.
-- **[Debugging & Verification](development/debugging-and-verification.md)**: Testing strategy, position mapping, and JDI debugger bridge.
-- **[SQLJ Design Checklist](development/sqlj-design-checklist.md)**: Practical guidelines for compiler bridges and editor recovery.
+## Provider and policies
 
-### 5. Maintainer & Implementation Guides
-- **[Maintainer Guide Index](maintainers/index.md)**: Main hub for maintainers and active contributors.
-- **[Building, Running & Local Installation](maintainers/building-and-running.md)**: Detailed Gradle commands (`buildPlugin`, `runIde`, `test`), installing `.zip` archives from disk, and sandbox workflows.
-- **[Source Code & Architecture Walkthrough](maintainers/source-code-walkthrough.md)**: Tour through all packages, AST/PSI models, SQL injection, synthetic classes, host variable binding, debugger position manager, and compiler integration.
-- **[Releasing & Deployment](maintainers/releasing-and-deployment.md)**: Release checklists, versioning, signing, and JetBrains Marketplace publishing.
+- [Legal notice](impressum.md)
+- [Website privacy notice](privacy.md)
 
-### 6. Legal & Policies
-- **[Licensing](licensing.md)**: Plugin, documentation and code-example license scopes.
-- **[Legal Notice / Impressum](impressum.md)**: Provider and contact details pursuant to DDG §5.
-- **[Privacy Notice](privacy.md)**: Data protection and privacy notice for sqlj-lang.org.
+Plugin engineering notes, implementation tests, source build instructions and
+release operations are maintained privately; they are not prerequisites for using
+the installed plugin. For questions contact [support](user-guide/troubleshooting.md).

@@ -1,127 +1,114 @@
 <!-- SPDX-License-Identifier: CC-BY-4.0; code examples: MIT -->
 
-# IntelliJ IDE Features & Code Insight
+# Editor features and existing projects
 
-The `sqlj-lang` plugin equips IntelliJ IDEA with rich, context-aware editing and debugging capabilities for SQLJ files.
+For exact scope and acceptance status, see [capabilities](compatibility.md).
+The plugin is an editor/debugger integration; it does not replace the application's
+SQLJ translator, SQLJ runtime, binding/customization or database deployment.
 
----
+## Prepare an existing project
 
-## 1. Syntax Highlighting & Color Schemes
+1. Import the real Maven POM or existing build model. Configure the project/module
+   SDK and the translator-compatible JDBC **and SQLJ runtime** dependencies. A JDBC
+   driver dependency alone is not a complete SQLJ toolchain.
+2. Register `.sqlj` sources as source content (`src/main/sqlj` is conventional).
+   Keep ordinary `.java` in `src/main/java` and generated Java in its own directory.
+   Changes made only in the IDE project model may be overwritten by build reimport;
+   declare roots in your existing build where appropriate.
+3. Enable enhanced Java integration by placing this marker at the very start of
+   each SQLJ file, before package declarations or license comments:
 
-The plugin provides high-fidelity syntax highlighting for hybrid Java and SQLJ files:
+   ```java
+   // sqlj:experimental-java-view
+   ```
 
-- **SQLJ Directives & Keywords**: `#sql`, `iterator`, `context`, `with` highlighted in distinctive colors.
-- **Host Variables & Bind Modes**: `:varName`, `:IN`, `:OUT`, `:INOUT` highlighted with special bind-variable formatting.
-- **Color Settings Page**: Customize colors via **Settings** -> **Editor** -> **Color Scheme** -> **SQLJ**.
+   The provider is selected when the IDE creates the file view. After adding or
+   removing the marker, close and reopen the project so the view is recreated.
+   The marker affects editor semantics, not SQLJ compilation or runtime SMAP.
+4. Wait for import/indexing. Confirm imports match the actual package, then test
+   Ctrl+B and member completion. Missing runtime dependencies can limit both Java
+   API resolution and the plugin's type checks.
+5. Keep translation in your build. Generated files must correspond to source;
+   do not edit generated Java as the authoritative source.
 
-<p align="center">
-  <img src="../assets/web/editor-illustration.svg" alt="SQLJ Highlighting and Editor Features" width="750" style="max-width: 100%; height: auto;">
-</p>
+Without the marker, SQLJ parsing/highlighting and legacy assistance remain, but
+the shared Java view's highlighting, expression and scope checks are not equivalent.
 
----
+## Navigation, completion and errors
 
-## 2. Multi-Host DB2 SQL Injection
+The enhanced Java view supports Java type/member completion and error checks in
+regular Java sections. Host names and parenthesized expressions use Java lexical
+scope: parameters, locals, shadowing, fields and static context. Ctrl+B navigates
+host variables to declarations. Named iterator accessors and modeled context and
+iterator members are available before translation, including nested declarations.
 
-Inside any `#sql { ... }` execution block, IntelliJ injects the database language dialect (e.g. IBM DB2 SQL):
+Java consumers can navigate back to SQLJ classes and methods. Standard Maven
+output in `target/generated-sources/sqlj` has source redirection where a match is
+found. Duplicate class/package names, unresolved imports or custom generated
+layouts can prevent a unique target. Use the navigation diagnostic below.
 
-- **Keyword Highlighting & Formatting**: SQL keywords (`SELECT`, `FROM`, `WHERE`, `JOIN`, `CURRENT TIMESTAMP`) are colored and formatted according to your SQL style rules.
-- **SQL Code Inspections**: Dialect-specific warnings and inspections flag SQL syntax mistakes without breaking the surrounding Java parser tree.
-- **Database Schema Completion**: When connected to an active Database Tool window DataSource, table and column names auto-complete dynamically.
+Errors include unresolved Java names/calls, selected declaration-option checks,
+invalid output targets, primitive-short indicator requirements and resolvable
+connection/execution-context roles. Incomplete code or unresolved dependencies
+can suppress secondary checks. The translator remains the final build authority.
 
----
+Reference/rename handlers cover selected cases; **complete cross-language rename
+and Find Usages are not yet accepted**. Use previews and review the resulting diff,
+especially for iterator columns, generated APIs and references in SQL fragments.
 
-## 3. Bidirectional Navigation & Code Insight
+## Embedded DB2 SQL assistance
 
-### Navigation (`Go to Declaration` / `Find Usages`)
-- **Host Variables**: Press `Ctrl+B` (Windows/Linux) or `Cmd+B` (macOS) on `:myVariable` inside an SQL block to jump directly to the Java field, parameter, or local variable declaration.
-- **Java References in SQLJ**: Jump directly to declarations of Java classes, methods, parameters, fields, and variables used in regular Java code within `.sqlj` files.
-- **Iterators & Contexts**: Jump directly to `#sql iterator MyIter(...)` and `#sql context MyCtx` declarations from any usage point across Java and SQLJ files.
-- **Project Java Classes**: Classes defined in `.sqlj` files (e.g. `ProductRepository`) are exposed to the IDE's Java type system via synthetic class providers, enabling seamless navigation from other Java sources.
+The injector prefers a registered `DB2` language, falling back to `SQL` or
+`GenericSQL`. If none is available, no SQL language is injected. Rich SQL syntax,
+schema inspections and table/column completion depend on the IDE's optional SQL/
+Database Tools plugin and its capabilities/entitlement. Configure a data source
+and SQL resolution scope using that IDE's database tooling. Merely enabling this
+plugin does not connect to a database or discover production schemas.
 
-### Code Completion
-- **Java & SQLJ Keywords**: Intelligent completion for standard Java keywords (`class`, `return`, `try`, `finally`, etc.) as well as SQLJ directives (`#sql`, `iterator`, `context`).
-- **Scope Variables & Fields**: Suggestions for all visible local variables, parameters, and fields within the active method or class scope.
-- **Member & Iterator Methods**: Typing `myIter.` in Java code auto-completes generated iterator column accessors (`id()`, `name()`, `price()`) and control methods (`next()`, `close()`).
-- **SQL & Host Binds**: Inside `#sql` blocks, suggestions cover DB2 SQL keywords, bind modes (`IN`, `OUT`, `INOUT`), and host variables (`:varName`).
+Java binds and their indicators are replaced by SQL parameter placeholders for
+injection. This does not implement every DB2 SQLJ-specific SQL construct, guarantee
+SQL formatting behavior or validate query/result types against the catalog.
+SQL dialect assistance does not establish z/OS, IBM i or Oracle runtime support.
+Customize SQLJ colors under **Settings → Editor → Color Scheme → SQLJ**.
 
-### Refactoring & Rename
-- **Host Variables**: Renaming a Java variable or parameter automatically renames all corresponding `:hostVar` references in embedded `#sql` blocks and vice versa.
+## Toolchain settings: what they currently do
 
----
+**Settings → Languages & Frameworks → SQLJ & DB2 Toolchain** exposes project-level
+translator, JDBC, generated-root and environment settings. Environment profiles
+are defaults, **not provisioned containers or validated server adapters**. The
+Testcontainers entry does not create/manage test containers. There is no Test
+Connection button or complete automatic build-on-save/IDE compiler pipeline.
 
-## 4. Source-Level Debugging
+The implementation contains a translator command runner, but it is not registered
+as a general compiler/build action. Do not assume configuring this page causes
+translation, binding or inline translator errors on each build. Use your actual
+Maven or other build. Online checking fields prepare translator arguments when
+the runner is used; they do not enable continuous live catalog validation.
 
-SQLJ source breakpoints and automatic Maven preparation have been confirmed in
-an installed-plugin run of the DB2 wizard application. This is a Java debugger
-integration, independent of Spring Boot. Use executable Java statements or the
-opening `#sql` line; declarations and SQL continuation lines may not be executable.
-Full stepping and expression-evaluation acceptance is still in progress.
+Generated-root registration can add an existing configured directory to the
+project model. It does not create generated code or replace Maven root management.
+The wizard's Maven profiles operate independently of these settings.
 
-See **[Debugging Java, Spring and WebSphere Liberty](debugging-project-types.md)**
-for the project-specific IDE/Maven setup, WAR/JAR deployment and Remote JVM Debug
-instructions. A Liberty session remains a separate acceptance gate.
+**Credentials:** the current password field is stored in project settings
+(`.idea/sqlj.xml`), not IntelliJ Password Safe, and runner arguments can include
+it. Leave it empty for sensitive environments and supply credentials through your
+approved build/database tooling. Exclude credential-bearing project files from
+version control. See [administration](../administration/deployment.md).
 
-### Build preparation before Run/Debug
+## Diagnose editor resolution
 
-New wizard projects include **SQLJ Demo (Maven + SMAP)** in the run configuration
-selector. Import `pom.xml` as a Maven project, select that configuration and click
-Run or Debug. It executes `clean process-classes`, including SQLJ translation,
-Java compilation and SMAP installation. The application starts only after a
-successful build. The first DB2 initialization can take 15 minutes; downloads and
-compilation add to that time. Later launches still perform a clean build.
+Open the affected file, place the caret on the exact reference and run
+**Tools → SQLJ: Inspect Navigation at Caret**, or find that action with
+Ctrl+Shift+A. Check source-content/root, imports, the file provider, resolved
+reference and indexed SQLJ classes. The experimental marker should produce
+`SqljJavaFileViewProvider`. A failed reference with a wrong import needs an import
+fix, not a translator run. Use **SQLJ: Inspect Debug Session** for runtime mapping
+issues; it requires a paused Java session.
 
-For an **existing project**, open **Run > Edit Configurations**, select its
-Java/Application or Spring Boot configuration and use **Modify options > Add
-before launch task > SQLJ: Prepare Debug Build**. Enter the absolute path to the
-appropriate Maven POM and the goals used by your SQLJ debug build. Keep this task
-last, after any ordinary Build task, so that Java compilation cannot overwrite
-installed source maps afterward. A Build task after preparation blocks launch
-with a notification. The wizard disables its redundant ordinary Build task.
-If an earlier IDE Build cannot compile a project before SQLJ generation, disable
-that redundant task and let the Maven preparation perform the complete build.
+## Build and debug
 
-The plugin task is reusable across Maven projects and has no dependency on the
-starter's package or main class. It uses IntelliJ's Maven runner/JDK/settings and
-saves modified documents before the build. Maven support must be enabled and the
-POM must be imported. The selected Maven goals must actually translate SQLJ,
-compile Java and install valid debug metadata; adding this task does not retrofit
-arbitrary customer POMs. Custom tools and Gradle remain later adapters. Remote JVM
-Debug uses the same Java debugger bridge, but the deployed classes must already
-contain matching metadata; the task does not perform remote deployment.
-Existing configurations are changed only when you explicitly add/configure the task.
-
-For an older **wizard starter**, run from the plugin repository in PowerShell:
-
-```powershell
-py -3 scripts\install_starter_debug_configuration.py --project "C:\Users\danny\tmp\sqljtest013"
-```
-
-This creates `.run/SQLJ-Demo.run.xml` without replacing existing configurations.
-Use `--module "actual-module-name"` if IntelliJ's module was renamed. Select
-**SQLJ Demo (Maven + SMAP)** afterward. The starter must already have the current
-`tools/SqljDebugInfo.java` and Maven SMAP build integration. A manually edited
-configuration with the same filename is left unchanged.
-
----
-
-## 5. DB2 Toolchain & Environment Settings
-
-Configure the SQLJ translation pipeline and target database environment in **Settings** -> **Languages & Frameworks** -> **SQLJ & DB2 Toolchain**:
-
-- **Target DB2 Environments**:
-  - **Installed DB2 Instance**: Connects to enterprise or local DB2 instances (LUW / z/OS).
-  - **Docker / Podman Container**: Optimised default JDBC URL (`jdbc:db2://localhost:50000/SAMPLE`) and credential mappings for containerised databases.
-  - **Testcontainers**: Seamless support for ephemeral test containers with automated connection parameters.
-- **Online Semantics Checking**: Enables compile-time table and column validation against the live DB2 database catalog (`-url`, `-user`, `-password`, `-default-schema`).
-- **Compiler Runner & Diagnostics**: Customisable translator executable path (`sqlj` / `db2sqljcompiler`) with inline message mapping to `.sqlj` source lines.
-- **Generated Sources Management**: Automatically manages and registers output directories (`build/generated/sources/sqlj` or `target/generated-sources/sqlj`) as project source roots.
-
----
-
-## 6. "New Project" Wizard (Spring Boot & DB2 Starter)
-
-The plugin includes an integrated Project Wizard for IntelliJ IDEA:
-
-- **Template Generation**: Creates a runnable Spring Boot 3.4 + Thymeleaf application configured with Spring JDBC and IBM DB2 driver (`jcc`).
-- **One-Command Local DB2 Container**: Generates a pre-configured `compose.yaml` spinning up a local DB2 instance with a `SAMPLE` database and healthchecks.
-- **Embedded SQLJ Repository & Web UI**: Includes a working SQLJ repository with typed iterators and bind variables (`ProductRepository.sqlj`) and an interactive Thymeleaf UI for browsing and updating records.
+New wizard projects include **SQLJ Demo (Maven + SMAP)**. For an existing imported
+Maven project, add **SQLJ: Prepare Debug Build** last in Before launch and configure
+the real POM/goals. Its goals must translate, compile and embed matching debug
+metadata. The task does not install those build steps in your POM or deploy servers.
+Follow [debugging setup](debugging-project-types.md) for details and current limits.

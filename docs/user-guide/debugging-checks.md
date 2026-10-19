@@ -6,7 +6,7 @@ Use a current wizard project and the **SQLJ Demo (Maven + SMAP)** configuration.
 This is an installed-plugin acceptance procedure, not an editor-only fixture.
 Use the development DB2 container. Do not transfer it into a production deployment.
 The application need not otherwise depend on Spring Boot: for other launch types,
-follow [the Java/Spring/Liberty setup](../../docs/user-guide/debugging-project-types.md).
+follow [the Java/Spring/Liberty setup](debugging-project-types.md).
 
 Record the plugin/IDE/JDK versions and whether each observation passed. Breakpoint
 hits and automatic builds have been confirmed in the wizard; the following
@@ -203,25 +203,4 @@ language. They must still use the SQLJ lexical context. Existing expressions who
 language is inferred from SQLJ sources remain supported. Enter Java expressions
 without host-variable colons or `#sql` wrappers in either mode.
 
-These scenarios require live installed-plugin acceptance. Automated SDK tests
-check factory selection, boolean/String PSI types and native breakpoint settings;
-they do not execute breakpoint conditions or print log messages in an actual IDE.
-
-## Automated evidence and remaining limits
-
-`SqljDebugSteppingJdiTest` launches a real child JVM with a controlled SMAP installed
-by the actual starter helper. It checks mapped Step Over/Into/Out, a multi-line
-generated block, runtime skipping, parameters, initialized locals and the caller
-frame. The runtime class is a tiny test fixture, not the IBM runtime. Policy tests
-cover exact package boundaries and preserve user/Spring/Liberty frames.
-
-These checks do not exercise IntelliJ's complete UI, real DB2 translation/execution,
-Liberty, runtime expression evaluation or every generated iterator wrapper.
-`SqljCodeFragmentScopeTest` additionally checks Java debugger expression and
-presentation factories, lexical resolution of locals/parameters, shadowing,
-imports, static/nested contexts, code blocks and compatibility entry points.
-`SqljBreakpointExpressionTest` also selects factories through IntelliJ's actual
-dispatch path and prepares expressions from a native SQLJ line breakpoint,
-including a non-suspending log action and removal of its independent condition.
-These SDK tests validate PSI preparation/settings, not expression execution in a live IDE.
-That is why this manual scenario remains a separate acceptance gate.
+These scenarios require live installed-plugin acceptance. Component tests alone do not establish that breakpoint conditions execute or log messages print in an installed IDE.

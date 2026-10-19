@@ -203,7 +203,7 @@ loader/artifact when multiple versions of a library are present.
 
 ## Checking stepping and variable display
 
-Use the [manual stepping and frame scenario](../../examples/debugging/README.md)
+Use the [manual stepping and frame scenario](debugging-checks.md)
 with a rebuilt wizard project. It covers F8 over SQLJ blocks, F7 into a user helper,
 Step Out, parameters and initialized locals, and switching between caller/callee
 frames. A breakpoint stops before the statement executes, so a local initialized
@@ -219,17 +219,16 @@ or filter Spring/Liberty frames. IntelliJ's own stepping preferences still apply
 The SQLJ code-fragment factory prepares **Java** expressions at the suspended
 source position, using the same Java projection as host-expression code insight.
 It keeps the enclosing method/block rather than using a class-level context.
-Current SDK hooks cover both evaluation and presentation fragments; compatibility
-bridges also handle the deprecated entry points.
+The integration prepares evaluation and presentation expressions.
 
-For the [manual helper scenario](../../examples/debugging/README.md), stop after
+For the [manual helper scenario](debugging-checks.md), stop after
 `offset` is initialized, select the helper frame and evaluate `count`, `offset`
 and `count + offset` in Watches and **Evaluate Expression** (`Alt+F8`). Select the
 caller frame to inspect its locals and `this.dataSource`. Enter Java expressions,
 not `:count` or `#sql` text. A static frame has no `this`; not-yet-initialized or
 out-of-scope locals can legitimately be unavailable.
 
-This patch adds lexical-context preparation and SDK regression coverage. Live
+Lexical-context preparation is implemented. Live
 Watches/evaluation, conditions and log expressions still need installed-plugin
 acceptance. The native Java debugger remains responsible for expression execution,
 actual runtime values and method invocation; the plugin does not introduce a
@@ -244,7 +243,7 @@ Java boolean expression in the stopped method/block's scope. **Evaluate and log*
 is a Java expression whose value is printed to the debugger Console. Uncheck
 **Suspend** for a log-only breakpoint; a condition can also restrict which hits log.
 
-Use [the deterministic condition/log scenario](../../examples/debugging/README.md):
+Use [the deterministic condition/log scenario](debugging-checks.md):
 three helper invocations with values 0, 1, 2, a shadowed local/field and an expected
 single conditional hit. It also checks non-suspending logs, combined condition/log
 behavior and expression errors. Set the breakpoint after the referenced locals'

@@ -1,97 +1,52 @@
 <!-- SPDX-License-Identifier: CC-BY-4.0; code examples: MIT -->
 
-# Tutorial: Your First SQLJ Program
+# Walk through the generated DB2 application
 
-In this tutorial, you will create and run a complete SQLJ application that creates a table, inserts records with host variables, and reads them back.
+The runnable starting point is the installed plugin's **New Project wizard**.
+Follow [getting started](../user-guide/getting-started.md) to install the package,
+create/import the demo and complete its first DB2 startup. No private source clone
+or separate example download is required.
 
----
+## Follow one request through the code
 
-## Step 1: Create the Project File
+1. Open `ProductController.java` under `src/main/java` and find its repository use.
+   Ctrl+B on `ProductRepository` should open `ProductRepository.sqlj` under
+   `src/main/sqlj`, rather than requiring you to edit generated Java.
+2. In the SQLJ repository, inspect the named iterator declaration. Its columns
+   become modeled Java accessor methods for completion and navigation.
+3. Follow `findAll()`: the repository obtains a JDBC connection from the configured
+   DataSource, wraps it in a SQLJ context, executes a query into an iterator,
+   traverses rows and creates Product objects. The generated code shows its cleanup.
+4. Find a host bind such as `:targetCategory` or `:newStock`. Ctrl+B should navigate
+   to its Java declaration. In a disposable copy, try an invalid member name and
+   confirm highlighting, then undo the change.
+5. Run the application and open [http://localhost:8080](http://localhost:8080).
+   Browse the products and exercise a stock update. Flyway supplied the schema
+   and seed records; SQLJ did not create them merely by opening the file.
 
-Create a file named `HelloSqlj.sqlj` under `src/main/sqlj/org/example/HelloSqlj.sqlj`:
+## Understand the build boundary
 
-```java
-package org.example;
+The `.sqlj` file is the source you edit. Maven invokes the IBM translator to create
+Java and SQLJ profile resources, compiles Java and installs source maps at
+`process-classes`. IDE assistance can work before translation, but execution needs
+the complete build/runtime. The starter POM explicitly translates its repository
+input; adding another `.sqlj` requires extending that build input configuration.
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import sqlj.runtime.ref.DefaultContext;
+For an IDE run/debug select **SQLJ Demo (Maven + SMAP)**. To package from a terminal:
 
-public class HelloSqlj {
-
-    // Define a named iterator for querying greeting records
-    #sql public static iterator MessageIter(int id, String recipient, String message);
-
-    public static void main(String[] args) {
-        String url = "jdbc:db2://localhost:50000/SAMPLE";
-        String user = "db2inst1";
-        String pass = "password";
-
-        try (Connection conn = DriverManager.getConnection(url, user, pass)) {
-            // Set default SQLJ connection context
-            DefaultContext.setDefaultContext(new DefaultContext(conn));
-
-            // 1. Create table
-            #sql {
-                CREATE TABLE greetings (
-                    id INT NOT NULL PRIMARY KEY,
-                    recipient VARCHAR(100),
-                    message VARCHAR(255)
-                )
-            };
-            System.out.println("Table 'greetings' created successfully.");
-
-            // 2. Insert rows using host variables
-            insertGreeting(1, "Alice", "Welcome to SQLJ!");
-            insertGreeting(2, "Bob", "Static SQL makes Java fast and reliable.");
-
-            // 3. Query rows using single-row SELECT INTO
-            int count = 0;
-            #sql { SELECT COUNT(*) INTO :count FROM greetings };
-            System.out.println("Total greetings in database: " + count);
-
-            // 4. Query all rows using Named Iterator
-            MessageIter iter;
-            #sql iter = { SELECT id, recipient, message FROM greetings ORDER BY id };
-
-            while (iter.next()) {
-                System.out.printf("[%d] To %s: %s%n",
-                    iter.id(), iter.recipient(), iter.message());
-            }
-            iter.close();
-
-            // 5. Clean up
-            #sql { DROP TABLE greetings };
-            System.out.println("Table dropped. Tutorial complete!");
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static void insertGreeting(int id, String recipient, String msg) throws SQLException {
-        #sql {
-            INSERT INTO greetings (id, recipient, message)
-            VALUES (:id, :recipient, :msg)
-        };
-    }
-}
+```powershell
+mvn clean package
 ```
 
----
+A successful package is not proof that all editor/debugger functions are accepted.
+Use the [debugging checks](../user-guide/debugging-checks.md) to exercise those paths.
 
-## Step 2: What Happened Here?
+## Make one small SQLJ change
 
-1. **`DefaultContext.setDefaultContext(...)`**: Associates the active JDBC connection with all `#sql` statements that do not specify an explicit context qualifier.
-2. **`#sql { CREATE TABLE ... }`**: DDL executed directly without `Statement.executeUpdate()` string formatting.
-3. **`:id, :recipient, :msg`**: Host variables automatically bound by name without positional `?` placeholder indexing.
-4. **`SELECT COUNT(*) INTO :count`**: Direct assignment into local Java integer variable.
-5. **`MessageIter`**: Strongly typed cursor with generated `id()`, `recipient()`, and `message()` accessors.
+In a disposable demo copy, change a SQL query's ordering while keeping the selected
+columns compatible with the iterator, then rebuild and verify the page result.
+Do not change generated Java. If a build rejects the SQL, retain its first
+translator/database message; the IDE is not the final authority on DB2 semantics.
 
----
-
-## Next Steps
-
-- Learn about advanced iterators in [Working with SQLJ Iterators](working-with-iterators.md).
-- Learn about multi-connection handling in [DB2 Connections & Execution Contexts](db2-connection-and-contexts.md).
+Continue with [iterators](working-with-iterators.md) and
+[connection/execution contexts](db2-connection-and-contexts.md).

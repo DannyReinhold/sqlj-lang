@@ -6,7 +6,7 @@ title: Privacy notice
 
 # Privacy notice
 
-Last updated: 16 October 2026. This notice covers the public documentation website
+Last updated: 18 October 2026. This notice covers the public documentation website
 **sqlj-lang.org**, not applications or database tools that developers build with SQLJ.
 
 ## Controller and contact
@@ -52,8 +52,9 @@ caching of requested pages remain necessary technical functions.
 
 Links to GitHub, JetBrains and other websites do not embed those services. If you
 follow a link, the destination provider processes the resulting request under its
-own privacy terms. Our pages set a no-referrer policy. This policy does not prevent
-a destination from receiving your IP address when you visit it.
+own privacy terms. The browser and the effective referrer policy determine
+whether a referring URL is sent. A destination receives your IP address when
+you visit it.
 
 ## Contacting us
 

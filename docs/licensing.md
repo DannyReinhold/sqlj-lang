@@ -7,7 +7,7 @@ IBM or JetBrains product. Their names and marks remain their owners' property.
 ## Plugin
 
 The plugin implementation, tests, project-owned resources and standalone source
-examples are offered under the unmodified
+examples are governed by the unmodified
 [PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0).
 It permits noncommercial purposes and the organization categories expressly
 listed in that license, including educational and government institutions.
@@ -36,8 +36,13 @@ These grants do not license third-party marks, IBM runtimes or downloaded toolch
 The applicable license texts/notices accompany source and plugin distributions;
 the public documentation repository carries CC BY and MIT texts.
 
-## Repository separation
+## Source access and repository separation
 
-Gitea is the canonical development repository. GitHub is a generated documentation
+The plugin source repository is private. License terms do not promise public
+source availability or grant repository credentials. Obtain the installed package
+through the maintainer/approved distributor, or the applicable Marketplace offer
+when available. No public Marketplace release is implied by this pre-release guide.
+
+Gitea is the private development repository. GitHub is a generated documentation
 repository and contains no plugin source or binary distribution. Previously issued
 Apache-2.0 rights for older copies are not revoked by the repository/license change.

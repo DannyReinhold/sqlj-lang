@@ -1,133 +1,68 @@
 <!-- SPDX-License-Identifier: CC-BY-4.0; code examples: MIT -->
 
 <p align="center">
-  <img src="assets/web/social-preview.svg" alt="SQLJ Language Support" width="600" style="max-width: 100%; height: auto;">
+  <img src="assets/web/social-preview.svg" alt="SQLJ Language Support" width="600">
 </p>
 
-# Embedded SQL in Java, modernized.
+# SQLJ Language Support for IntelliJ IDEA
 
-**SQLJ brings static, type-safe, and high-performance SQL directly into Java.  
-The `sqlj-lang` IntelliJ plugin provides first-class developer tooling, intelligent code completion, and source-level debugging for modern Java & DB2 enterprise environments.**
+Edit Java with embedded SQL in `.sqlj` files: host-variable completion,
+Java/SQLJ navigation and DB2-oriented SQL assistance. A project wizard creates a
+Spring Boot demonstration with a local DB2 LUW container.
 
----
+**Current status: pre-release, under stabilization.** Source breakpoints and Maven
+preparation have been confirmed in the DB2 wizard application. Stepping, watches,
+conditions and logpoints are implemented but still awaiting full installed-IDE
+acceptance. Oracle SQLJ, Derby and other DB2 server/toolchain combinations are
+not supported release claims. See the [capability matrix](user-guide/compatibility.md).
 
+## Choose your starting point
 
-> [!WARNING]
-> **DB2 DEMO: THE FIRST START CAN TAKE MANY MINUTES. PLEASE DO NOT ABORT EARLY.**
-> The first image download and SAMPLE database initialization can be very slow.
-> The generated starter allows **15 minutes for database readiness after container startup**;
-> image download/build time is additional, so a complete cold launch can exceed 15 minutes.
-> Keep the build running. In a second terminal, use `docker compose logs --follow db2`
-> to see initialization progress. A running container is not yet a ready database.
-> Later starts normally reuse the initialized database and become ready much sooner.
+| Your responsibility | Start here |
+| --- | --- |
+| Evaluate, approve or distribute the plugin | [Administration and deployment](administration/deployment.md) |
+| Install and try the DB2 demo | [Getting started](user-guide/getting-started.md) |
+| Work on an existing SQLJ codebase | [Editor features and project setup](user-guide/ide-features.md) |
+| Debug SQLJ code | [Debugging setup](user-guide/debugging-project-types.md) |
+| Diagnose a problem | [Troubleshooting and support](user-guide/troubleshooting.md) |
+| Check entitlement and reuse of examples | [Licensing](licensing.md) |
 
-## What is SQLJ?
+> **FIRST DB2 START: ALLOW MANY MINUTES.** The image download and SAMPLE database
+> creation can be slow. The starter waits up to **15 minutes for readiness after
+> container startup**, in addition to download/build time. The complete cold launch
+> can exceed 15 minutes. Keep the build running and follow
+> `docker compose logs --follow db2` in another terminal. A running container does
+> not yet mean that the database is ready.
 
-SQLJ (ANSI/ISO SQL standard Part 0) allows developers to write static SQL statements directly embedded within Java source code using `#sql` directives. Rather than assembling fragile dynamic SQL strings with standard JDBC, SQLJ delivers:
+## What the plugin and the translator do
 
-- **Compile-time validation**: SQL syntax, table structures, and column types are verified before deployment.
-- **Type-safe host variables**: Seamless binding of Java fields, parameters, and expressions (`:variable`, `:(expr)`, `:OUT param`).
-- **Strongly typed iterators**: Type-safe query result sets via named and positional iterator constructs without manual `ResultSet.getXXX()` calls.
-- **Optimized execution plans**: Static DB2 packages and pre-bound database access plans offering predictable, ultra-fast enterprise query performance.
+The plugin supplies IDE assistance. The IBM SQLJ translator, JDBC/SQLJ runtime,
+database privileges and any required customization/binding remain part of your
+application's build and deployment. SQL/schema checking depends on the actual
+translator configuration or the IDE's optional database tooling; this plugin does
+not independently validate every statement against a live database.
 
----
-
-## Editor & IDE Experience
-
-<p align="center">
-  <img src="assets/web/editor-illustration.svg" alt="SQLJ Editor Illustration" width="800" style="max-width: 100%; height: auto;">
-</p>
-
-The IntelliJ IDEA plugin transforms `.sqlj` development into a native, high-productivity editing experience:
-
-- **Seamless Syntax Highlighting**: Dual-layer highlighting combining Java keywords, `#sql` directives, SQL clauses, and bind variables.
-- **Multi-Host SQL Dialect Injection**: Embedded SQL blocks inside `#sql { ... }` leverage IntelliJ's DB2 SQL dialect with schema inspection and table/column auto-completion.
-- **Bidirectional Navigation**: Jump directly between Java declarations and SQL bind variables (`Ctrl+B` / `Cmd+B`).
-- **Source-Level Debugging**: Set breakpoints directly in `.sqlj` files, step through code line-by-line, and evaluate live expressions without leaving original sources.
-
----
-
-## A Complete SQLJ Example
+For example, in a configured SQLJ class with an available connection context:
 
 ```java
-package org.example.payroll;
-
-import java.sql.SQLException;
-import java.math.BigDecimal;
-import sqlj.runtime.ref.DefaultContext;
-
-public class EmployeeService {
-
-    // Declare a type-safe named iterator
-    #sql public static iterator EmployeeIterator(
-        long id,
-        String name,
-        String department,
-        BigDecimal salary
-    );
-
-    public void processDepartmentBonuses(String dept, BigDecimal bonusPercent) throws SQLException {
-        EmployeeIterator employees;
-
-        // Execute embedded query with bind variables into typed iterator
-        #sql employees = {
-            SELECT id, name, department, salary
-            FROM employees
-            WHERE department = :dept AND active = 1
-            ORDER BY id
-        };
-
-        while (employees.next()) {
-            long empId = employees.id();
-            BigDecimal currentSalary = employees.salary();
-            BigDecimal newSalary = currentSalary.multiply(BigDecimal.ONE.add(bonusPercent));
-
-            // Execute in-place update using host variables and parenthesized expressions
-            #sql {
-                UPDATE employees
-                SET salary = :newSalary,
-                    last_bonus_date = CURRENT DATE
-                WHERE id = :empId
-            };
-
-            System.out.printf("Updated employee %s (#%d): %s -> %s%n",
-                employees.name(), empId, currentSalary, newSalary);
-        }
-        employees.close();
-    }
-}
+int employeeId = 42;
+String name = null;
+#sql { SELECT name INTO :name FROM employee WHERE id = :employeeId };
 ```
 
----
+`:employeeId` reads a Java value; `:name` is a write target in `SELECT INTO`.
+Use Ctrl+B to navigate to their declarations. This fragment assumes the table,
+connection and application build already exist. The [wizard walkthrough](tutorials/first-sqlj-program.md)
+is the runnable starting point.
 
-## Where to Go Next?
+## Distribution and ownership
 
-| Your Goal | Recommended Starting Point |
-|---|---|
-| **Documentation Map** | [Explore the full documentation index](documentation-map.md) |
-| **Get Started** | [Installation & Quick Start Guide](user-guide/getting-started.md) |
-| **User Guide** | [Read the SQLJ User Guide](user-guide/index.md) |
-| **Language Reference** | [Comprehensive SQLJ Syntax & Directive Reference](user-guide/language-reference.md) |
-| **IDE Features** | [IntelliJ Editor Insight, Completion & Debugging](user-guide/ide-features.md) |
-| **Step-by-Step Tutorials** | [Explore Hands-on Tutorials](tutorials/index.md) |
-| **Developer & Architecture Docs** | [Plugin Internals & Contributor Guide](development/index.md) |
-| **Maintainer & Source Guide** | [Maintainer Guide, Build Steps & Code Walkthrough](maintainers/index.md) |
+The source repository is private. The [GitHub repository](https://github.com/DannyReinhold/sqlj-lang)
+contains generated public documentation and website assets only; it cannot be
+cloned to build the plugin. Obtain an approved plugin ZIP from the maintainer,
+or use its Marketplace listing once published. No Marketplace release is implied
+by this pre-release documentation.
 
----
-
-## Compatibility & System Requirements
-
-- **IntelliJ IDEA**: Build `#261.24374-151` (2026.1+) and compatible JetBrains IDEs.
-- **Java Platform**: Java 21 LTS or higher.
-- **Database Support**: IBM DB2 for LUW / z/OS, Apache Derby, Oracle Database with SQLJ runtime support.
-- **Build Systems**: Gradle, Apache Maven, and IBM DB2 `sqlj` / `db2sqlj` command-line translators.
-
----
-
-[Public documentation on GitHub](https://github.com/DannyReinhold/sqlj-lang) ·<br>
-[Contributing & Architecture](development/index.md) ·  
-[Maintainer Guide](maintainers/index.md) ·  
-[Development Roadmap](development/development-plan.md) ·  
-[Licensing: plugin PolyForm / documentation CC BY](licensing.md) ·<br>
-[Legal Notice / Impressum](impressum.md) ·  
-[Privacy Notice](privacy.md)
+This is an independent plugin by Danny Reinhold, not an official IBM or JetBrains
+product. See [licensing](licensing.md), [legal notice](impressum.md) and
+[privacy](privacy.md). [All documentation](documentation-map.md).

@@ -2,7 +2,7 @@
 
 # Tutorial: Working with SQLJ Iterators
 
-This tutorial demonstrates how to leverage SQLJ iterators for efficient, type-safe cursor handling, comparing **Named Iterators** and **Positional Iterators**.
+These fragments compare named and positional result traversal in an already configured DB2 SQLJ project. They assume the illustrated tables, an active connection context and SQLException handling. They are not standalone runnable projects; start with the [wizard walkthrough](first-sqlj-program.md). Editor modeling does not validate every query/result type.
 
 ---
 
@@ -119,7 +119,7 @@ public class InventoryService {
 | **Row Navigation** | `iter.next()` | `#sql { FETCH :iter INTO :v1, :v2 };` |
 | **Value Access** | Accessor method (e.g. `iter.col1()`) | Directly into bound variables |
 | **Column Matching** | Name / Alias matching | Strictly column order |
-| **Best For** | Business logic, readable services | Tight performance loops, minimal method overhead |
+| **Best For** | Business logic, readable services | Explicit positional result assignment |
 
 ---
 
