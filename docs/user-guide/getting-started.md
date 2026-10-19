@@ -41,8 +41,8 @@ projects using that same container/port unless you adapt their configuration.
 The Compose template is a **local development example**, with a privileged DB2
 container and demo credentials. Review `compose.yaml` under your organization's
 container policy. It is not a production deployment template. IBM image/tool
-license terms apply independently. Docker-based startup is the validated baseline;
-rootless Podman equivalence has not been established.
+license terms apply independently. The generated startup commands use Docker and Compose. A Podman environment
+requires adapting that toolchain; it is not a drop-in option supplied by the wizard.
 
 ## 3. Create and import the project
 
@@ -56,12 +56,8 @@ support, right-click `pom.xml` and choose **Add as Maven Project**, then reload.
 Keep `.java` in `src/main/java` and `.sqlj` in `src/main/sqlj`. The wizard includes
 the enhanced Java-view marker in its SQLJ repository.
 
-> **FIRST DB2 START: ALLOW MANY MINUTES — PLEASE DO NOT ABORT EARLY.**
-> The starter allows **15 minutes for readiness after container startup**;
-> image download/build time is additional. The complete first launch can exceed
-> 15 minutes. A running container or open port is not proof that SAMPLE is ready.
-> In a second terminal, from the generated project directory, use
-> `docker compose logs --follow db2` to watch initialization.
+DB2 and its SAMPLE database are initialized automatically. Follow container output
+with `docker compose logs --follow db2` from the generated project directory.
 
 ## 4. Run the demo
 
@@ -121,8 +117,8 @@ module was renamed, select its actual module in Edit Configurations.
 
 Set a breakpoint on an executable Java statement in the SQLJ repository or the
 opening `#sql` line, then open the product page. `mvn compile` alone stops too early
-to install SMAP. Full stepping/evaluation acceptance is still in progress; use the
-[debugging guide](debugging-project-types.md) for setup, limits and diagnostics.
+to install SMAP. Use the [debugging guide](debugging-project-types.md) for source-map
+setup, stepping, expression evaluation and diagnostics.
 
 ## 6. Move to your own project
 

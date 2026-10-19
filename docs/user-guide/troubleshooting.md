@@ -2,8 +2,8 @@
 
 # Troubleshooting and support
 
-Check the [capability matrix](compatibility.md) before treating an unvalidated
-server or translator as a supported configuration. You do not need private source
+Check the [capability matrix](compatibility.md) for server/toolchain requirements
+and supported integrations. You do not need private source
 access to investigate or report an installed-plugin problem.
 
 ## Editor and project import
@@ -26,7 +26,7 @@ currently show an error. Diagnostic output is evidence, not a source-root repair
 
 | Symptom | Check |
 | --- | --- |
-| Cold start waits for minutes | Image download plus SAMPLE initialization; allow the 900-second readiness budget, plus download/build time. Follow DB2 logs from the generated project directory. |
+| DB2 initialization still running | Follow DB2 logs from the generated project directory. Downloads and SAMPLE creation depend on local resources. |
 | Readiness timeout | `docker compose ps`, `docker compose logs --tail 100 db2`; inspect health output, engine resources, port/name conflicts and actual database connection/query success. Do not delete volumes to retry. |
 | Container is running, app still waiting | Running/open port is not equivalent to a ready database. The healthcheck connects and executes `VALUES 1`. |
 | Tools not found or unexpected profile | `mvn help:active-profiles`; current starter checks a fixed local Maven jar path, not PATH. Toolchain settings and generated POM profiles are separate. |
@@ -63,7 +63,7 @@ Debug Session**. `MATCH` verifies the embedded source hash against editor text;
 `MISMATCH` calls for matching rebuild/deploy; `ABSENT` means freshness is unverified.
 The action can inspect the editor's loaded class even when paused in Java. See
 [full debugging instructions](debugging-project-types.md) for metadata limits and
-[manual checks](debugging-checks.md) for stepping/evaluation expectations.
+[debugger walkthrough](debugging-checks.md) for stepping/evaluation expectations.
 
 ## Send a useful issue report
 
@@ -85,5 +85,4 @@ Include:
 
 Do not send customer sources, full logs, passwords, tokens, JDBC secrets or
 production values. Use a small invented example and review paths, source snippets,
-class names and vendor data before sharing reports. A successful build, PSI test
-or source hash is not a substitute for a reproducible installed-IDE observation.
+class names and vendor data before sharing reports. Include a reproducible sequence and the relevant application/build configuration.

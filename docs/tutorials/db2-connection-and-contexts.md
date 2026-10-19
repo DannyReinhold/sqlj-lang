@@ -62,7 +62,7 @@ This form models a different constructor family, including a parameterless
 constructor for an existing JNDI resource. An application server must provision
 that resource first. The plugin does not create it or configure pooling.
 The wizard container demo does not require JNDI; this is an additional API/editor
-scenario, not an accepted Liberty deployment recipe.
+scenario. Configure the server's JNDI resource separately for a Liberty deployment.
 
 ## Transactions and multiple databases
 

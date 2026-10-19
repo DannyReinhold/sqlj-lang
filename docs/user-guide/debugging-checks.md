@@ -1,16 +1,12 @@
 <!-- SPDX-License-Identifier: CC-BY-4.0; code examples: MIT -->
 
-# SQLJ stepping, stack frames and local variables
+# Debugger walkthrough: stepping, watches and breakpoint expressions
 
 Use a current wizard project and the **SQLJ Demo (Maven + SMAP)** configuration.
-This is an installed-plugin acceptance procedure, not an editor-only fixture.
+The examples below show how to use the debugger in the generated application.
 Use the development DB2 container. Do not transfer it into a production deployment.
 The application need not otherwise depend on Spring Boot: for other launch types,
 follow [the Java/Spring/Liberty setup](debugging-project-types.md).
-
-Record the plugin/IDE/JDK versions and whether each observation passed. Breakpoint
-hits and automatic builds have been confirmed in the wizard; the following
-stepping/evaluation results still need separate installed-plugin acceptance.
 
 ## 1. Step Over and initialization
 
@@ -203,4 +199,4 @@ language. They must still use the SQLJ lexical context. Existing expressions who
 language is inferred from SQLJ sources remain supported. Enter Java expressions
 without host-variable colons or `#sql` wrappers in either mode.
 
-These scenarios require live installed-plugin acceptance. Component tests alone do not establish that breakpoint conditions execute or log messages print in an installed IDE.
+Remove the temporary helper methods when you have finished exploring the debugger.

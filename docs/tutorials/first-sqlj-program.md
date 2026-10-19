@@ -38,8 +38,8 @@ For an IDE run/debug select **SQLJ Demo (Maven + SMAP)**. To package from a term
 mvn clean package
 ```
 
-A successful package is not proof that all editor/debugger functions are accepted.
-Use the [debugging checks](../user-guide/debugging-checks.md) to exercise those paths.
+Use the [debugger walkthrough](../user-guide/debugging-checks.md) to try stepping,
+watches, conditions and logpoints in the application.
 
 ## Make one small SQLJ change
 

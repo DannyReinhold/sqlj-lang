@@ -2,22 +2,21 @@
 
 # Capabilities, compatibility and current limits
 
-Status reviewed **18 October 2026**, during pre-release stabilization. This page
-separates functionality present in the plugin from installed-IDE acceptance.
-Before production rollout, administrators should validate the exact plugin/IDE
-combination described in the delivered release notes.
+This page describes the plugin's features, requirements and integration boundaries.
+For managed installations, use the approved plugin/IDE combination from your
+organization's software distribution policy and the delivered release notes.
 
 ## Environment
 
 | Area | Current scope |
 | --- | --- |
-| IDE | The package declares minimum IntelliJ build `261.24374`. Installed-plugin checks have used IDEA Ultimate `262.10968.63`. This is not certification of every newer build or other JetBrains IDE. |
+| IDE | The package declares minimum IntelliJ build `261.24374`. Use a compatible IntelliJ IDEA installation with Java support. Other JetBrains IDEs are not covered by this guide. |
 | Java support | Requires the IDE's Java plugin. Use the IDE's supported bundled runtime; do not replace it to satisfy application requirements. |
 | Demo build | JDK 21, Maven, Docker and Compose v2 with `up --wait --wait-timeout`; network access for initial dependencies/image download. |
 | SQL assistance | DB2 language injection when available, otherwise SQL/GenericSQL fallback. Rich schema assistance requires optional Database Tools/SQL support, its entitlement and a configured data source. |
 | DB2 baseline | Generated wizard project, DB2 LUW container image `icr.io/db2_community/db2:11.5.9.0`. |
-| z/OS and IBM i | Not yet validated as server/toolchain targets. Similar SQL syntax does not establish binding, deployment or debugging compatibility. |
-| Oracle SQLJ and Derby | Not supported/validated in this release scope. Oracle integration is deferred. |
+| z/OS and IBM i | No dedicated server/toolchain integration. Use the application's vendor-specific translation, binding and deployment pipeline; the wizard targets LUW. |
+| Oracle SQLJ and Derby | Not currently supported. |
 | Build systems | Generated Maven starter and Maven before-launch preparation. Existing builds need their own translation/runtime setup. No automatic Gradle/Ant debug-build adapter. |
 
 The plugin does not bundle an IBM translator, database or licensed driver suite.
@@ -42,24 +41,24 @@ the enhanced Java view and its checks are not equivalent.
 | Header expressions | Context qualifiers and iterator assignment targets use Java expression insight. ConnectionContext/ExecutionContext roles are checked when runtime types are resolvable. |
 | Declaration options | Modeled iterator/context options and context constructor families, including `dataSource`; runtime/JNDI configuration is still the application's responsibility. |
 | SQL validation | SQL injection delegates to available IDE SQL tooling. Complete DB2 grammar, schema matching and translator semantics are not independently implemented. |
-| Rename / usages | References and rename handlers exist for selected host variables. Complete cross-language rename/find-usages coverage is not accepted; inspect previews/diffs. |
+| Rename / usages | References and rename handlers exist for selected host variables. Cross-language coverage is limited to modeled references; inspect previews/diffs. |
 
 Checks can be incomplete while typing or when runtime classes cannot be resolved.
 A file without red highlighting is not proof that the translator or database will
 accept it. The language guide describes editor coverage, not a replacement SQLJ standard.
 
-## Debugging acceptance
+## Debugging
 
-| Capability | Evidence / remaining work |
+| Capability | Behavior / requirements |
 | --- | --- |
-| Breakpoints in original SQLJ | Confirmed in the installed plugin with the DB2 wizard project and embedded SMAP. Executable lines only. |
-| Maven preparation before launch | Confirmed in the wizard. Reusable task for imported Maven POMs; customer POMs are not modified automatically. |
-| Stepping and locals | Implemented and exercised in controlled real-JVM tests; full DB2/IDE acceptance still pending. |
-| Watches, Evaluate, conditions and logpoints | Java-context preparation and regression tests present; live installed-IDE acceptance pending. |
-| Session diagnostics | Inspection action implemented; installed-IDE validation pending. Reports metadata, not variable values. |
-| Java/Spring without Boot and Liberty | Framework-independent design and setup instructions. Dedicated main-class/Liberty deployment/attach acceptance pending. |
-| HotSwap, dev-mode rebuilds, arbitrary customer translators | No general guarantee. Rebuild matching metadata and restart the debug session for the baseline. |
+| Breakpoints in original SQLJ | Stop on executable SQLJ source lines using SMAP embedded in loaded classes. |
+| Maven preparation before launch | Runs the configured imported Maven build and prevents launch on failure. Customer POMs are not modified automatically. |
+| Stepping and locals | Step Over, Step Into and Step Out with SQLJ source coordinates; inspect parameters and initialized locals in the selected frame. Runtime-package filters reduce SQLJ/DB2 implementation stops. |
+| Watches and Evaluate Expression | Java expressions use the selected SQLJ frame's lexical context. |
+| Conditions and logpoints | Java boolean conditions, evaluate-and-log expressions and native suspend policies on SQLJ line breakpoints. |
+| Session diagnostics | Inspect loaded maps, source fingerprints, class loaders and context metadata. Variable values are not collected in the report. |
+| Java/Spring and Liberty | Java debugger integration independent of Spring Boot. Main-class launch and server attach both require matching mapped classes and source. Server deployment remains part of your build/operations workflow. |
+| HotSwap and dev-mode rebuilds | No automatic SQLJ translation/map restoration after arbitrary recompilation. Rebuild matching metadata and restart the debug session when output changes. |
 
-See [debugging setup](debugging-project-types.md) and the
-[manual checks](debugging-checks.md). Successful JDI or PSI tests alone do not
-establish that the complete installed IDE workflow works.
+See [debugging setup](debugging-project-types.md) and
+[step-by-step debugger examples](debugging-checks.md).

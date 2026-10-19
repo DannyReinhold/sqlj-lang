@@ -3,7 +3,6 @@
 # SQLJ Language Support — public documentation
 
 Documentation for the independent IntelliJ IDEA plugin by Danny Reinhold.
-**Pre-release: stabilization and release acceptance are in progress.**
 
 | Audience | Starting point |
 | --- | --- |
@@ -12,10 +11,8 @@ Documentation for the independent IntelliJ IDEA plugin by Danny Reinhold.
 | Evaluators | [Capabilities and limitations](docs/user-guide/compatibility.md) |
 | Existing SQLJ projects | [Editor setup](docs/user-guide/ide-features.md) and [debugging](docs/user-guide/debugging-project-types.md) |
 
-> **FIRST DB2 DEMO START: ALLOW MANY MINUTES.** Database readiness may take up to
-> **15 minutes after container startup**; image download/build time is additional.
-> The complete first launch can exceed 15 minutes. Keep the build running and use
-> `docker compose logs --follow db2` in a second terminal to see progress.
+DB2 is initialized automatically when the demo starts. For startup details, use
+`docker compose logs --follow db2` from the generated project directory.
 
 This repository contains documentation and website assets only. Plugin source,
 implementation tests, internal plans, build scripts and binaries are private and

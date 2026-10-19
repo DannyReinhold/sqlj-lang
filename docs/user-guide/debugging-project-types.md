@@ -11,18 +11,18 @@ and a Spring application deployed to WebSphere Liberty (WLP): translation,
 compilation and debug metadata must correspond to the source open in the IDE.
 The server must actually execute those classes.
 
-## Current acceptance status
+## Launch options
 
-| Project / launch | Configuration | Status |
-| --- | --- | --- |
-| DB2 wizard application | Application; SQLJ preparation before launch | Source breakpoints and automatic Maven preparation confirmed in the installed plugin |
-| Java or Spring without Boot, started by a main class | Application; same preparation task | Framework-independent implementation; dedicated project acceptance remains to be recorded |
-| Spring on WebSphere Liberty / WLP | Server debug session or Remote JVM Debug | Setup documented below; a real Liberty session has not yet been accepted |
-| Different customer translator/build, remote/container deployment | Java debugger plus that build's metadata | Additional integration and acceptance required; no blanket compatibility claim |
+| Application | Setup |
+| --- | --- |
+| DB2 wizard application | Select SQLJ Demo (Maven + SMAP); preparation translates, compiles and installs maps before launch. |
+| Plain Java or Spring without Boot | Use the real main class/module and add the Maven preparation task for the application's debug build. |
+| Spring on WebSphere Liberty / WLP | Package/deploy mapped classes, enable server debugging and attach to that JVM. |
+| Other customer builds / deployments | Produce matching SQLJ source maps and Java debug tables through the project's actual toolchain. The plugin does not replace vendor binding or deployment. |
 
-Stepping, expression evaluation, class-loader/redeployment behavior and each
-server/JDK combination require separate verification. A successful Maven build
-alone does not verify a deployed application.
+The loaded classes, source maps and IDE sources must match. A local Maven build
+does not update an already deployed application; rebuild/redeploy through the
+project's normal procedure when necessary.
 
 ## Build requirements for every project type
 
@@ -134,7 +134,7 @@ requirements of the installed Liberty version (links below).
 
 ### Controlled build, deployment and attach
 
-For the first acceptance run, use a local development server and a repeatable
+For initial setup, use a local development server and a repeatable
 build/deploy cycle:
 
 1. Run the application's Maven debug build through packaging. Verify that the
@@ -194,7 +194,7 @@ automatic cycle must include SQLJ translation and SMAP installation after each
 compilation. Otherwise a previously working source breakpoint can stop binding
 after an edit. The plugin does not yet integrate the complete dev-mode cycle.
 
-For initial acceptance, avoid concurrent IDE compilation/dev-mode rebuilding of
+To keep build output consistent, avoid concurrent IDE compilation/dev-mode rebuilding of
 the same output. Build the mapped artifact, redeploy it and start a new debug
 session after edits. Do not assume IntelliJ HotSwap reruns the SQLJ translator or
 reinstalls metadata. Loose applications and container volume mounts also need to
@@ -207,8 +207,7 @@ Use the [manual stepping and frame scenario](debugging-checks.md)
 with a rebuilt wizard project. It covers F8 over SQLJ blocks, F7 into a user helper,
 Step Out, parameters and initialized locals, and switching between caller/callee
 frames. A breakpoint stops before the statement executes, so a local initialized
-on that line may only appear after the next step. Watches and expression evaluation
-are a separate acceptance check.
+on that line may only appear after the next step. Watches and expression evaluation use the selected stack frame.
 
 The SQLJ extra stepping filter only steps out of recognized SQLJ/DB2 runtime
 packages. It does not globally force Step Into, hide user lambdas/synthetic methods,
@@ -228,11 +227,9 @@ caller frame to inspect its locals and `this.dataSource`. Enter Java expressions
 not `:count` or `#sql` text. A static frame has no `this`; not-yet-initialized or
 out-of-scope locals can legitimately be unavailable.
 
-Lexical-context preparation is implemented. Live
-Watches/evaluation, conditions and log expressions still need installed-plugin
-acceptance. The native Java debugger remains responsible for expression execution,
-actual runtime values and method invocation; the plugin does not introduce a
-separate SQL evaluator. The same context preparation has no Spring Boot dependency.
+Expression evaluation uses the native Java debugger and the selected SQLJ frame's
+Java scope. Runtime values and method calls follow normal Java debugger behavior;
+there is no separate SQL evaluator and no Spring Boot requirement.
 
 ## Conditional breakpoints and log expressions
 
@@ -249,12 +246,10 @@ single conditional hit. It also checks non-suspending logs, combined condition/l
 behavior and expression errors. Set the breakpoint after the referenced locals'
 initializers. Every matching request can execute the expressions again.
 
-Explicitly **Java**-labelled expressions use the SQLJ-aware Java factory whenever
-the source context belongs to a SQLJ file. Expressions inferred from SQLJ source
-or previously stored with the SQLJ language keep the original factory. Ordinary
-Java files are not intercepted. Evaluation remains the native Java debugger's
-responsibility; the plugin supplies the lexical context, not a separate language
-or server runtime. Live condition/log behavior is a separate acceptance gate.
+Choose Java expression syntax for conditions and log expressions, including when
+the dialog labels their language as Java. Names resolve in the selected SQLJ
+method/block; use `this.name` to distinguish a field from a shadowing local.
+The native Java debugger performs the evaluation.
 
 ## Diagnosing missing SQLJ breakpoints
 
@@ -321,8 +316,8 @@ Manual checks: capture a report at a SQLJ breakpoint, then at a Java breakpoint
 with the SQLJ editor open. Edit the SQLJ source without saving and verify that
 its fingerprint becomes `MISMATCH`; undo the edit and check again. Also run the
 action while the VM is running: it should explain that a paused frame is needed.
-Successful report capture does not establish stepping, watch or condition support;
-continue those acceptance scenarios independently.
+For hands-on use of stepping, watches and conditions, follow the
+[debugger examples](debugging-checks.md).
 
 ## Reference documentation
 

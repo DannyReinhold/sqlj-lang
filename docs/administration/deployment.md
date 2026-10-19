@@ -12,9 +12,9 @@ just to distribute the plugin.
 
 Record the plugin version/archive SHA-256, exact IntelliJ build and edition,
 Java plugin status, optional Maven and Database Tools availability and permitted
-usage. The [compatibility matrix](../user-guide/compatibility.md) distinguishes
-observed behavior from unverified targets. The manifest's minimum build alone
-is not a tested compatibility matrix. Other JetBrains IDEs are not promised.
+usage. The [compatibility matrix](../user-guide/compatibility.md) lists requirements and
+integration boundaries. Use your approved IDE/plugin combination; other JetBrains
+IDEs are outside this guide's scope.
 
 The IDE's own runtime, the application's JDK and the Maven runner JDK are separate.
 For the generated demo, application/Maven Java must be JDK 21. Existing
@@ -65,7 +65,7 @@ Use a disposable development workspace and a representative application:
    Java method/import. A file looking normal is not an adequate error-check test.
 3. If licensed/enabled, verify DB2 SQL completion against a development data source.
 4. If debugging is required, build fresh maps and test a real SQLJ breakpoint.
-   Record stepping/evaluation separately using the [acceptance checks](../user-guide/debugging-checks.md).
+   Try stepping/evaluation using the [debugger walkthrough](../user-guide/debugging-checks.md).
 5. Confirm normal Java editing/debugging still behaves correctly. Test your exact
    Maven profiles and build/deploy pipeline; the wizard does not certify them.
 
@@ -73,7 +73,7 @@ The demo requires separate approval for Docker/image downloads and a privileged
 DB2 container. It exposes database port 50000 and HTTP port 8080, uses demo
 credentials and persistent database storage. Review port binding, volumes and
 IBM image/tool licensing. Do not deploy that configuration to production. DB2
-containers and first-start waits are demo requirements, not requirements for
+containers are demo requirements, not requirements for
 installing the plugin or editing an existing enterprise project.
 
 ## 4. Configuration and data handling
@@ -93,7 +93,7 @@ of data processing. Follow your existing development-security controls.
 
 ## 5. Update, rollback and removal
 
-Pilot an update against the same acceptance checks, then distribute the approved
+Pilot an update against the same pilot checks, then distribute the approved
 version through your usual channel. Do not assume every later IDE build is
 compatible simply because the package has no upper-build limit.
 

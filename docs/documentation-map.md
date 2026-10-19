@@ -21,8 +21,8 @@ It does not require access to the private plugin source repository.
 - [SQLJ reference](user-guide/language-reference.md): supported forms and editor checks.
 - [Debugging setup](user-guide/debugging-project-types.md): Maven preparation,
   source maps, Java/Spring launch, Liberty attach and diagnostics.
-- [Debugging verification](user-guide/debugging-checks.md): reproducible manual checks
-  with expected outcomes; these are acceptance instructions, not claims of completion.
+- [Debugger walkthrough](user-guide/debugging-checks.md): reproducible manual checks
+  for stepping, variables, watches, conditions and logpoints.
 - [Troubleshooting and support](user-guide/troubleshooting.md): symptoms, diagnostics
   and a useful, redacted problem report.
 

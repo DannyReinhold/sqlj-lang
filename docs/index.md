@@ -10,11 +10,11 @@ Edit Java with embedded SQL in `.sqlj` files: host-variable completion,
 Java/SQLJ navigation and DB2-oriented SQL assistance. A project wizard creates a
 Spring Boot demonstration with a local DB2 LUW container.
 
-**Current status: pre-release, under stabilization.** Source breakpoints and Maven
-preparation have been confirmed in the DB2 wizard application. Stepping, watches,
-conditions and logpoints are implemented but still awaiting full installed-IDE
-acceptance. Oracle SQLJ, Derby and other DB2 server/toolchain combinations are
-not supported release claims. See the [capability matrix](user-guide/compatibility.md).
+Set source breakpoints in SQLJ files, step through Java/SQLJ code, inspect local
+variables and use Java watches, breakpoint conditions and log expressions.
+Maven preparation keeps source maps aligned with the compiled application.
+See [capabilities and requirements](user-guide/compatibility.md) for setup and scope.
+Oracle SQLJ and Derby are not currently supported.
 
 ## Choose your starting point
 
@@ -27,12 +27,8 @@ not supported release claims. See the [capability matrix](user-guide/compatibili
 | Diagnose a problem | [Troubleshooting and support](user-guide/troubleshooting.md) |
 | Check entitlement and reuse of examples | [Licensing](licensing.md) |
 
-> **FIRST DB2 START: ALLOW MANY MINUTES.** The image download and SAMPLE database
-> creation can be slow. The starter waits up to **15 minutes for readiness after
-> container startup**, in addition to download/build time. The complete cold launch
-> can exceed 15 minutes. Keep the build running and follow
-> `docker compose logs --follow db2` in another terminal. A running container does
-> not yet mean that the database is ready.
+DB2 is initialized automatically when the demo starts. For startup details, use
+`docker compose logs --follow db2` from the generated project directory.
 
 ## What the plugin and the translator do
 

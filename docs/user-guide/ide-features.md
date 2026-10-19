@@ -2,7 +2,7 @@
 
 # Editor features and existing projects
 
-For exact scope and acceptance status, see [capabilities](compatibility.md).
+For features, requirements and limits, see [capabilities](compatibility.md).
 The plugin is an editor/debugger integration; it does not replace the application's
 SQLJ translator, SQLJ runtime, binding/customization or database deployment.
 
@@ -52,8 +52,8 @@ invalid output targets, primitive-short indicator requirements and resolvable
 connection/execution-context roles. Incomplete code or unresolved dependencies
 can suppress secondary checks. The translator remains the final build authority.
 
-Reference/rename handlers cover selected cases; **complete cross-language rename
-and Find Usages are not yet accepted**. Use previews and review the resulting diff,
+Reference/rename handlers cover selected cases; **cross-language rename
+and Find Usages are limited to modeled references**. Use previews and review the resulting diff,
 especially for iterator columns, generated APIs and references in SQL fragments.
 
 ## Embedded DB2 SQL assistance
@@ -75,7 +75,7 @@ Customize SQLJ colors under **Settings → Editor → Color Scheme → SQLJ**.
 
 **Settings → Languages & Frameworks → SQLJ & DB2 Toolchain** exposes project-level
 translator, JDBC, generated-root and environment settings. Environment profiles
-are defaults, **not provisioned containers or validated server adapters**. The
+are defaults, **not container provisioning or server adapters**. The
 Testcontainers entry does not create/manage test containers. There is no Test
 Connection button or complete automatic build-on-save/IDE compiler pipeline.
 
