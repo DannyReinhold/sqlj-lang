@@ -20,6 +20,7 @@ are not published here. Obtain an approved plugin ZIP from the maintainer, or us
 the Marketplace listing once available. You do not need source access to use it.
 The publisher replaces these files; send fixes through [support](docs/user-guide/troubleshooting.md).
 
+- [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/35279)
 - [Website](https://sqlj-lang.org) · [Documentation map](docs/documentation-map.md)
 - [Licensing](docs/licensing.md) · [Reporting issues](CONTRIBUTING.md)
 

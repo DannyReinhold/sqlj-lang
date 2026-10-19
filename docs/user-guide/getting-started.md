@@ -15,8 +15,9 @@ restart when requested. Confirm **SQLJ Language Support** is enabled under Insta
 package, activate its subscription/trial in the IDE's license management.
 Tools → SQLJ: License Information shows status and opens activation. A privately
 supplied customer package uses its separate written grant instead.
-Once a Marketplace version is published, the listing offers an alternative;
-this pre-release guide does not imply that it is already available.
+The [Marketplace listing](https://plugins.jetbrains.com/plugin/35279) provides installation and trial/subscription
+options once approved and published. In Settings → Plugins → Marketplace, search
+for **SQLJ Language Support** and check that the vendor is Danny Reinhold.
 
 Java support is required. Maven support is required for the demo import and its
 before-launch task. Optional Database Tools/SQL support adds SQL dialect/schema

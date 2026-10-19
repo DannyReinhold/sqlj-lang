@@ -16,6 +16,11 @@ Maven preparation keeps source maps aligned with the compiled application.
 See [capabilities and requirements](user-guide/compatibility.md) for setup and scope.
 Oracle SQLJ and Derby are not currently supported.
 
+[View on JetBrains Marketplace](https://plugins.jetbrains.com/plugin/35279) · [Installation guide](user-guide/getting-started.md)
+
+The listing provides available subscription/trial offers and installation options.
+Availability depends on Marketplace approval and publication.
+
 ## Choose your starting point
 
 | Your responsibility | Start here |

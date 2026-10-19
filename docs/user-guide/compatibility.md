@@ -10,7 +10,7 @@ organization's software distribution policy and the delivered release notes.
 
 | Area | Current scope |
 | --- | --- |
-| IDE | The package declares minimum IntelliJ build `261.24374`. Use a compatible IntelliJ IDEA installation with Java support. Other JetBrains IDEs are not covered by this guide. |
+| IDE | The package declares minimum IntelliJ IDEA 2026.1.2 build `261.24374.151`. Use a compatible IntelliJ IDEA installation with Java support. Other JetBrains IDEs are not covered by this guide. |
 | Java support | Requires the IDE's Java plugin. Use the IDE's supported bundled runtime; do not replace it to satisfy application requirements. |
 | Demo build | JDK 21, Maven, Docker and Compose v2 with `up --wait --wait-timeout`; network access for initial dependencies/image download. |
 | SQL assistance | DB2 language injection when available, otherwise SQL/GenericSQL fallback. Rich schema assistance requires optional Database Tools/SQL support, its entitlement and a configured data source. |

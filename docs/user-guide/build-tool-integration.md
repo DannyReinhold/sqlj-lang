@@ -47,7 +47,7 @@ print(destination)
 For example, from the existing application's root in PowerShell:
 
 ```powershell
-py -3 .\extract_sqlj_build_tool.py C:\Downloads\sqlj-lang-1.0.0.zip .\.mvn\sqlj\sqlj-debug-tool.jar
+py -3 .\extract_sqlj_build_tool.py C:\Downloads\sqlj-lang-1.0.1.zip .\.mvn\sqlj\sqlj-debug-tool.jar
 Get-FileHash .\.mvn\sqlj\sqlj-debug-tool.jar -Algorithm SHA256
 ```
 

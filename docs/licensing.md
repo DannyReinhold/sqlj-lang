@@ -17,7 +17,8 @@ The offer and purchase confirmation determine users, duration, renewal and
 fallback entitlement. With eligible perpetual fallback, a covered older release
 can remain usable after subscription expiry; this does not automatically cover
 the latest installed version. Consult the [EULA](eula.md) and actual offer.
-Contact [support@sqlj-lang.org](mailto:support@sqlj-lang.org) for availability.
+See the [Marketplace listing](https://plugins.jetbrains.com/plugin/35279) for currently available offers and pricing.
+Contact [support@sqlj-lang.org](mailto:support@sqlj-lang.org) for other arrangements.
 
 ## Selected-customer packages
 
