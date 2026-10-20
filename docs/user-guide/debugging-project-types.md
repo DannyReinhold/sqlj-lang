@@ -91,9 +91,10 @@ project are rejected rather than selecting an arbitrary source.
 - Place breakpoints on executable Java statements or the opening `#sql` line.
   Declarations and SQL continuation lines may have no executable location.
 
-The shared Java view is currently opt-in with the first-line marker
-`// sqlj:experimental-java-view`, as in wizard sources. This controls Java PSI
-integration; it does not generate runtime SMAP metadata.
+Complete the [Java integration setup](ide-features.md#prepare-an-existing-project)
+for existing SQLJ sources; wizard sources are already configured. Editor setup
+and debug metadata are separate: the application build must also embed matching
+SMAP data in the classes that will run.
 
 ### Configuring SQLJ: Prepare Debug Build
 

@@ -4,8 +4,8 @@
 
 Start with the task you need to perform:
 
-- [Integrate the debug build tool into existing Maven/CI processes](build-tool-integration.md).
 - [Install and run the DB2 demo](getting-started.md).
+- [Integrate the debug build tool into existing Maven/CI processes](build-tool-integration.md).
 - [Set up editor assistance in an existing project](ide-features.md).
 - [Check capabilities and limitations](compatibility.md).
 - [Look up SQLJ forms and editor checks](language-reference.md).

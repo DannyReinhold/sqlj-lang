@@ -58,7 +58,7 @@ migrations, web UI and **SQLJ Demo (Maven + SMAP)** run configuration.
 Wait for Maven import. If the Maven tool window has no project, enable Maven
 support, right-click `pom.xml` and choose **Add as Maven Project**, then reload.
 Keep `.java` in `src/main/java` and `.sqlj` in `src/main/sqlj`. The wizard includes
-the enhanced Java-view marker in its SQLJ repository.
+the SQLJ repository; Java integration is automatic, with no special source comment.
 
 DB2 and its SAMPLE database are initialized automatically. Follow container output
 with `docker compose logs --follow db2` from the generated project directory.
@@ -95,16 +95,38 @@ Stop Spring Boot with Ctrl+C. Container lifetime is separate; check `docker comp
 Use `docker compose stop db2` to stop the demo database without requesting volume
 deletion. Do not use volume-removal commands to troubleshoot a slow first start.
 
-### Translator selection: current behavior
+### Translator selection
 
-The generated POM selects `sqlj-local` if
-`${user.home}/.m2/repository/com/ibm/db2/sqlj/11.5/sqlj-11.5.jar` exists. Otherwise
-it selects `sqlj-container` and extracts tools from the DB2 image into `target`.
-**It does not currently search PATH for a `sqlj` executable.** The local profile
-also assumes its configured JDBC jar path; using it requires those local artifacts.
-Use `mvn help:active-profiles` to inspect the selection. Do not confuse these Maven
-profiles with the plugin's separate Toolchain settings; those settings do not
-rewrite the generated POM. The container profile is the default fallback.
+New starters select tools at build time in this order:
+
+1. `-Dsqlj.executable=<path>` or `-Dsqlj.translator.jar=<path>` when explicitly set.
+   Executable selection wins if both are set. An invalid explicit path fails.
+2. A `sqlj` executable/script on PATH (`.exe`, `.cmd`, `.bat`, `.com` on Windows).
+3. `${user.home}/.m2/repository/com/ibm/db2/sqlj/11.5/sqlj-11.5.jar` if installed.
+4. The translator extracted from the ready DB2 demo container into `target/sqlj4.zip`.
+
+The `[SQLJ]` build output identifies the selected tool. Maven supplies the
+application dependency classpath; a nonstandard Maven repository location does
+not require a hardcoded JDBC JAR path. For example, in PowerShell:
+
+```powershell
+mvn spring-boot:run "-Dsqlj.executable=C:/IBM SQLJ/bin/sqlj.cmd"
+```
+
+Or select a translator JAR instead of a script:
+
+```powershell
+mvn spring-boot:run "-Dsqlj.translator.jar=C:/IBM SQLJ/java/sqlj4.zip"
+```
+
+The bundled build launcher translates every `.sqlj` file recursively below
+`src/main/sqlj` in one invocation and requests source maps for each. It waits
+for database health before container extraction, and stops the build if a tool
+or translation step fails. Old `sqlj-local`/`sqlj-container` profiles are not used
+by newly generated projects. After removing or renaming SQLJ inputs, run
+`mvn clean process-classes` to remove stale generated Java/classes before debugging.
+Existing projects keep their current POM until
+explicitly updated; plugin installation never rewrites it.
 
 ## 5. Try navigation and debugging
 
@@ -127,9 +149,9 @@ setup, stepping, expression evaluation and diagnostics.
 ## 6. Move to your own project
 
 Follow [existing-project editor setup](ide-features.md). Keep your approved
-translator/runtime/binding pipeline. The demo POM currently translates its one
-`TodoRepository.sqlj` input; adding files does not automatically add translation
-executions. The plugin does not supply a complete generic Maven/Gradle/Ant build.
+translator/runtime/binding pipeline. New demo projects automatically translate
+all SQLJ sources under their configured root. Existing enterprise projects keep
+their own translation and binding steps; the plugin does not rewrite them.
 For a runnable orientation, continue with the [wizard walkthrough](../tutorials/first-sqlj-program.md).
 
 ## The Small Steps demo

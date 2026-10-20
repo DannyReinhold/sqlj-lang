@@ -3,9 +3,9 @@
 # SQLJ tutorials
 
 Begin with the [wizard application walkthrough](first-sqlj-program.md), the
-runnable DB2 LUW baseline. The other tutorials show SQLJ source fragments for an
-already configured project and schema; they are not independent ready-to-build
-applications or promises of complete SQLJ support.
+runnable DB2 application. Continue with iterators and connection contexts to
+understand common SQLJ patterns. Those examples assume an existing configured
+project, SQLJ runtime and the schema named in each example.
 
 - [Wizard walkthrough](first-sqlj-program.md): run, navigate and change the demo.
 - [Named and positional iterators](working-with-iterators.md): result traversal

@@ -6,15 +6,18 @@
 
 # SQLJ Language Support for IntelliJ IDEA
 
-Edit Java with embedded SQL in `.sqlj` files: host-variable completion,
-Java/SQLJ navigation and DB2-oriented SQL assistance. A project wizard creates a
-Spring Boot demonstration with a local DB2 LUW container.
+Work with Java and embedded SQL together in IntelliJ IDEA. Complete host
+expressions, find Java errors directly in `.sqlj` files and navigate between Java
+callers and SQLJ declarations without waiting for translation. DB2-oriented SQL
+assistance fits alongside your existing build and runtime.
+
+Try the project wizard for a ready-to-run ToDo application with Spring Boot and
+a local DB2 database, or integrate the plugin into an existing SQLJ project.
 
 Set source breakpoints in SQLJ files, step through Java/SQLJ code, inspect local
 variables and use Java watches, breakpoint conditions and log expressions.
 Maven preparation keeps source maps aligned with the compiled application.
 See [capabilities and requirements](user-guide/compatibility.md) for setup and scope.
-Oracle SQLJ and Derby are not currently supported.
 
 [View on JetBrains Marketplace](https://plugins.jetbrains.com/plugin/35279) · [Installation guide](user-guide/getting-started.md)
 
@@ -61,8 +64,8 @@ is the runnable starting point.
 The source repository is private. The [GitHub repository](https://github.com/DannyReinhold/sqlj-lang)
 contains generated public documentation and website assets only; it cannot be
 cloned to build the plugin. Obtain an approved plugin ZIP from the maintainer,
-or use its Marketplace listing once published. No Marketplace release is implied
-by this pre-release documentation.
+or use the [Marketplace listing](https://plugins.jetbrains.com/plugin/35279)
+for available versions and trial/subscription options.
 
 This is an independent plugin by Danny Reinhold, not an official IBM or JetBrains
 product. See [licensing](licensing.md), [legal notice](impressum.md) and

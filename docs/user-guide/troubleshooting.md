@@ -20,23 +20,25 @@ A customer distribution shows its customer reference and uses the written grant,
 not Marketplace checks. Do not share license stamps/activation keys in support
 reports. Opening files and existing run configurations must not delete or change
 source because a license is unavailable; activate and reopen the project if its
-Java view was created before licensing was ready.
+license status has changed. The Java file structure itself no longer depends on
+activation timing.
 
 ## Editor and project import
 
 | Symptom | Check |
 | --- | --- |
 | `.sqlj` opens as plain text | Plugin enabled, correct file-type association, restart after installation. |
-| Java errors/completion missing inside SQLJ | First-line `// sqlj:experimental-java-view`, project reopened after marker change, source root, module SDK, imports and runtime dependencies. |
+| Java errors/completion missing inside SQLJ | Complete [Java integration setup](ide-features.md#prepare-an-existing-project): source roots, module SDK, imports and SQLJ runtime dependencies. Java integration is automatic; no source comment is required. |
 | Java consumer cannot resolve SQLJ class | Match package/import/class names, source content, scope and duplicate names; run the navigation diagnostic on the exact reference. Translation is not required for the enhanced editor model. |
-| Plain Java has no errors in `src/main/sqlj` | Keep Java in the build's normal `src/main/java` root. An IDE source-content flag alone did not ensure Java analysis in the observed mixed-root setup. |
+| Plain Java has no errors in `src/main/sqlj` | Keep ordinary `.java` files in the build's `src/main/java` root and reload the build model. Use `src/main/sqlj` for `.sqlj` sources. |
 | SQL tables/columns do not complete | Optional Database Tools/SQL support, entitlement, DB2 dialect availability, development data source and SQL resolution scope. The plugin does not auto-connect. |
 | Maven tool window is empty | Enable Maven, Add as Maven Project on `pom.xml`, reload and wait for import. |
 
 Open the affected reference and run **Tools → SQLJ: Inspect Navigation at Caret**
 (or Ctrl+Shift+A). Confirm source/root, provider, resolution and indexed classes.
-Copy/redact the report. Wrong imports must be fixed even if the editor does not
-currently show an error. Diagnostic output is evidence, not a source-root repair.
+Check package/import names against the class you expect to resolve. Correct the
+project configuration, reload the build and retry. If the problem remains, include
+a redacted diagnostic report with your support request.
 
 ## Demo and translator build
 
@@ -45,8 +47,8 @@ currently show an error. Diagnostic output is evidence, not a source-root repair
 | DB2 initialization still running | Follow DB2 logs from the generated project directory. Downloads and SAMPLE creation depend on local resources. |
 | Readiness timeout | `docker compose ps`, `docker compose logs --tail 100 db2`; inspect health output, engine resources, port/name conflicts and actual database connection/query success. Do not delete volumes to retry. |
 | Container is running, app still waiting | Running/open port is not equivalent to a ready database. The healthcheck connects and executes `VALUES 1`. |
-| Tools not found or unexpected profile | `mvn help:active-profiles`; current starter checks a fixed local Maven jar path, not PATH. Toolchain settings and generated POM profiles are separate. |
-| Added SQLJ file is not translated | The demo POM lists its repository input explicitly. Extend the real translation build; editor recognition does not add Maven executions. |
+| Translator not found or unexpected selection | Read the `[SQLJ]` build message. New starters select an explicit executable/JAR, then PATH, the conventional local Maven JAR, or container extraction. Fix an invalid explicit path; it does not silently fall back. |
+| Added SQLJ file is not translated | New starters translate every `.sqlj` below `src/main/sqlj`. Keep ordinary Java in `src/main/java`. Earlier generated projects retain their original POM; update their build explicitly or generate a fresh demo. |
 | Build fails during SMAP installation | Preserve the first helper error, translator options and generated map. Rebuild cleanly; do not disable validation or copy an old map onto different classes. |
 
 Run these commands from the generated application directory, not the plugin ZIP:

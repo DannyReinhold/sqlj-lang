@@ -65,7 +65,7 @@ bypass such restrictions.
 Use a disposable development workspace and a representative application:
 
 1. Confirm `.sqlj` file recognition without the optional database plugin.
-2. In an imported project, verify source roots, first-line Java-view marker and
+2. In an imported project, verify source roots and
    SQLJ runtime dependencies; test a valid reference and an intentionally wrong
    Java method/import. A file looking normal is not an adequate error-check test.
 3. If licensed/enabled, verify DB2 SQL completion against a development data source.
@@ -85,7 +85,7 @@ installing the plugin or editing an existing enterprise project.
 
 | Item | Handling |
 | --- | --- |
-| Plugin Toolchain settings | Project state in `.idea/sqlj.xml`; the password is an ordinary persisted field, not Password Safe. Do not store production secrets there or commit the file with credentials. |
+| Plugin Toolchain settings | Nonsecret project state in `.idea/sqlj.xml`; no password field. Online checking references a private, access-restricted external SQLJ properties file. See [credential setup](../user-guide/ide-features.md#credentials). |
 | Maven preparation | Per-run-configuration POM/goals. It saves editor documents and executes the selected imported Maven project's build. Review shared run configurations and goals as executable project configuration. |
 | Runtime/source data | Editor features inspect project files. Debug diagnostics inspect paused JVM metadata and variable names/types, not variable values. The user must explicitly copy/share reports. |
 | Network/build access | Plugin tasks delegate to Maven; the demo invokes Docker and downloads dependencies/images. Optional IDE database tooling can connect to configured data sources. No blanket offline or no-network guarantee. |
@@ -108,7 +108,7 @@ and restart if needed. To roll back, retain/install the previous approved ZIP
 through disk installation and verify the displayed version after restart. Removal
 uses the same Installed page. Do not delete project sources or generated databases.
 
-Disabling/removing the plugin does not revert a project's POM, SQLJ marker,
+Disabling/removing the plugin does not revert a project's POM, source comments,
 `.run` files, toolchain settings or Docker resources. Remove/disable the plugin's
 before-launch task if you need to launch that project without the plugin, and
 use the application's established build process. Container cleanup is a separate

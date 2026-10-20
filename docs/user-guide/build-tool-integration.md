@@ -47,7 +47,7 @@ print(destination)
 For example, from the existing application's root in PowerShell:
 
 ```powershell
-py -3 .\extract_sqlj_build_tool.py C:\Downloads\sqlj-lang-1.0.1.zip .\.mvn\sqlj\sqlj-debug-tool.jar
+py -3 .\extract_sqlj_build_tool.py C:\Downloads\sqlj-lang-1.0.3.zip .\.mvn\sqlj\sqlj-debug-tool.jar
 Get-FileHash .\.mvn\sqlj\sqlj-debug-tool.jar -Algorithm SHA256
 ```
 
@@ -209,3 +209,27 @@ output. Stop/redeploy/restart as required by the server, then verify a source
 breakpoint on an executable SQLJ line. The plugin's **SQLJ: Inspect Debug Session**
 action can inspect loaded metadata at a paused frame. See the
 [debugger setup and diagnostics](debugging-project-types.md) for details.
+
+## Automatic translation in new starter projects
+
+The helper JAR also contains a build-only `SqljToolchain` launcher. New wizard POMs
+invoke it in `generate-sources`, between source-fingerprint capture and Java
+compilation/SMAP installation. It discovers the translator and translates all
+`.sqlj` files recursively under `src/main/sqlj`. See
+[translator selection](getting-started.md#translator-selection) for overrides.
+This launcher and the SMAP installer are our MIT-licensed code; IBM translation,
+customization and JDBC tools retain their own licenses.
+
+The generated POM uses Exec Maven Plugin's `<classpath/>` argument so application
+dependencies come from Maven, including customized local repositories. The
+launcher does not copy a vendor translator into the application artifact or
+replace an enterprise binding/customization pipeline. It performs offline
+translation; keep online credentials in your approved external build setup.
+See [credential handling](ide-features.md#credentials).
+
+Updating the IDE plugin does not update a previously generated application's
+helper JAR or POM. For a new project, generate a fresh starter. To adopt the new
+launcher in an existing application, extract the current helper using the
+procedure above, review the new POM configuration and retain your application's
+own source roots, classpath, build goals and deployment process. Do not overwrite
+application sources or database migrations with generated examples.

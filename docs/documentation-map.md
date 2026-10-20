@@ -12,7 +12,7 @@ It does not require access to the private plugin source repository.
 - [Administration and deployment](administration/deployment.md): prerequisites,
   approved distribution, licensing review, rollout, updates, rollback and data handling.
 - [Capabilities and compatibility](user-guide/compatibility.md): implemented behavior,
-  verified baseline and explicit limits.
+  environment requirements and integration boundaries.
 - [Licensing](licensing.md): plugin, documentation, starter and third-party rights.
 - [Commercial Plugin EULA](eula.md): subscription, trial, fallback and customer grants.
 
@@ -24,7 +24,7 @@ It does not require access to the private plugin source repository.
 - [SQLJ reference](user-guide/language-reference.md): supported forms and editor checks.
 - [Debugging setup](user-guide/debugging-project-types.md): Maven preparation,
   source maps, Java/Spring launch, Liberty attach and diagnostics.
-- [Debugger walkthrough](user-guide/debugging-checks.md): reproducible manual checks
+- [Debugger walkthrough](user-guide/debugging-checks.md): step-by-step examples
   for stepping, variables, watches, conditions and logpoints.
 - [Troubleshooting and support](user-guide/troubleshooting.md): symptoms, diagnostics
   and a useful, redacted problem report.

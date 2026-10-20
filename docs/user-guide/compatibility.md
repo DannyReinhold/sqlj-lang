@@ -23,17 +23,18 @@ Follow the terms for each separately obtained component.
 
 ## Editor and SQLJ forms
 
-Most Java integration below requires the **first-line** marker
-`// sqlj:experimental-java-view` and correct source roots/dependencies. It is
-included in the wizard's repository. Without it, basic SQLJ support remains, but
-the enhanced Java view and its checks are not equivalent.
+Java completion, error highlighting and navigation require the
+[existing-project setup](ide-features.md#prepare-an-existing-project), including
+source roots and runtime dependencies. Java integration is automatic; a source
+comment is not required. These editor features
+work before SQLJ translation; building and running still use your own toolchain.
 
 | Feature | Implemented behavior and boundary |
 | --- | --- |
 | Java inside SQLJ | Java declaration/type/member insight through a shared Java view; missing imports/types and invalid calls are highlighted. Translation is not required for this editor model. |
 | Java → SQLJ | Navigation to source classes/methods and modeled iterator/context declarations, including nested declarations. Generated Java in the standard Maven output is redirected to SQLJ where matched. |
 | Named iterators | Declared column accessors and modeled runtime API available to completion/navigation. |
-| Positional iterators | Type-only declarations and modeled positional runtime API; `FETCH` forms are recognized. No promise of full result-schema/type checking. |
+| Positional iterators | Type-only declarations, positional runtime API and recognition of `FETCH` forms. Query/result compatibility remains the translator's responsibility. |
 | Binds | `IN`, `OUT`, `INOUT`, names and parenthesized Java expressions; Java lexical scope, shadowing and member resolution. Bare binds also act as output targets where SQLJ syntax requires it. |
 | Write targets | Output/INOUT target checks include writable variables, fields and array elements; a computed method result is not a writable target. |
 | Indicators | Primitive `short` checks; variables, fields and array elements (including Java index expressions), parenthesized forms and input expressions. Output indicators must also be writable. |
@@ -44,7 +45,7 @@ the enhanced Java view and its checks are not equivalent.
 
 Checks can be incomplete while typing or when runtime classes cannot be resolved.
 A file without red highlighting is not proof that the translator or database will
-accept it. The language guide describes editor coverage, not a replacement SQLJ standard.
+accept it. Use the [language reference](language-reference.md) for supported forms and examples.
 
 ## Debugging
 
